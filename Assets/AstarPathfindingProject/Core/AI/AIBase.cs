@@ -438,7 +438,7 @@ namespace Pathfinding {
 
 			// This is where we should search to
 			// Request a path to be calculated from our current position to the destination
-			seeker.StartPath(start, end);	
+			seeker.StartPath(start, end);
 		}
 
 		/// <summary>
