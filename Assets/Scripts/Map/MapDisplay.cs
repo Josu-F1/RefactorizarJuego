@@ -32,6 +32,9 @@ public class MapDisplay : MonoBehaviourSingleton<MapDisplay>
     private TextMeshProUGUI tooltipText;
 
     [SerializeField]
+    private TextMeshProUGUI usernameText;
+
+    [SerializeField]
     private KeyCode displayKey = KeyCode.E;
 
     [SerializeField]
@@ -49,6 +52,8 @@ public class MapDisplay : MonoBehaviourSingleton<MapDisplay>
         HideMap();
         SetLocationTextToDefault();
         SetTooltipTextToDefault();
+
+        usernameText.text = DataManager.CurrentUsername;
     }
 
     private void Update()
