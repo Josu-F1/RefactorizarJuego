@@ -1,6 +1,6 @@
 # Boom Master
 
-Blow up all the enemies in the way and save the world!
+Blow up all the enemies in the way and save the world!..
 
 ## Description
 
