@@ -37,10 +37,21 @@ public class PlayerStatDisplayComposer : MonoBehaviour
         }
 
         // Obtener componentes y crear adaptadores
-        BombSpawner bombSpawner = player.GetComponentInChildren<BombSpawner>();
+        // Intentar primero el nuevo BombSpawnerComposer, luego el antiguo BombSpawner
+        BombSpawnerComposer newBombSpawner = player.GetComponentInChildren<BombSpawnerComposer>();
+        BombSpawner oldBombSpawner = newBombSpawner == null ? player.GetComponentInChildren<BombSpawner>() : null;
+        
         MoveComponent moveComponent = player.GetComponent<MoveComponent>();
         
-        IBombStats bombStats = bombSpawner != null ? new BombStatsAdapter(bombSpawner) : null;
+        IBombStats bombStats = null;
+        if (newBombSpawner != null)
+        {
+            bombStats = new BombSpawnerComposerStatsAdapter(newBombSpawner);
+        }
+        else if (oldBombSpawner != null)
+        {
+            bombStats = new BombStatsAdapter(oldBombSpawner);
+        }
         IMovementStats movementStats = moveComponent != null ? new MovementStatsAdapter(moveComponent) : null;
         IUserInfo userInfo = new GameUserInfo();
 
