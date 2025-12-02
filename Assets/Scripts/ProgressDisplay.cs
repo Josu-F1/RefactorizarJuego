@@ -1,6 +1,14 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID
+/// Usar ProgressDisplayComposer con sistema refactorizado
+/// - Viola SRP: Mezcla UI, persistencia y lógica de negocio
+/// - Viola DIP: Depende de implementaciones concretas
+/// - Viola OCP: Difícil de extender sin modificar
+/// </summary>
+[System.Obsolete("Use ProgressDisplayComposer instead. This class violates SOLID principles.")]
 public class ProgressDisplay : MonoBehaviour
 {
     public Text userNameText;
