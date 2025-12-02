@@ -4,6 +4,11 @@ using UnityEngine;
 using System;
 using UnityEngine.Events;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID y OCP.
+/// Usar HealthSystemComposer con Strategy Pattern
+/// </summary>
+[System.Obsolete("Use HealthSystemComposer instead. This class violates SOLID principles.")]
 public class Health : MonoBehaviour
 {
     public static Action<float, Health> OnAnyCharacterHealthChanged { get; set; }
