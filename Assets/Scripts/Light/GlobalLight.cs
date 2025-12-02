@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[System.Obsolete("GlobalLight is deprecated. Use LightSystemComposer with LightComponent instead.")]
 public class GlobalLight : MonoBehaviourSingleton<GlobalLight>
 {
 #if UNITY_2022_3_OR_NEWER

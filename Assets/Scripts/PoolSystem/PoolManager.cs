@@ -1,6 +1,12 @@
 using System.Collections.Generic;
 using UnityEngine;
+using PoolSystem;
 
+/// <summary>
+/// OBSOLETO: Usar PoolSystemComposer en su lugar
+/// Mantenido solo para compatibilidad temporal
+/// </summary>
+[System.Obsolete("Use PoolSystemComposer instead. This will be removed in future versions.")]
 [System.Serializable]
 public class Pool
 {
@@ -16,10 +22,18 @@ public class Pool
     public GameObject Container { get; set; }
     public Queue<GameObject> Queue { get; set; }
 }
+/// <summary>
+/// OBSOLETO: Usar PoolSystemComposer en su lugar
+/// Redirige automáticamente al nuevo sistema si está disponible
+/// </summary>
+[System.Obsolete("Use PoolSystemComposer instead. This will be removed in future versions.")]
 public class PoolManager : MonoBehaviourSingleton<PoolManager>
 {
     [SerializeField] private Pool[] pools;
     private Dictionary<PoolObjectType, Pool> poolDictionary;
+    
+    // Compatibilidad con nuevo sistema
+    private bool useNewSystem => PoolSystemComposer.Instance != null;
     protected override void Awake()
     {
         base.Awake();
@@ -35,6 +49,13 @@ public class PoolManager : MonoBehaviourSingleton<PoolManager>
     }
     public GameObject Get(PoolObjectType type, Vector3 position, Quaternion quaternion)
     {
+        // Redirigir al nuevo sistema si está disponible
+        if (useNewSystem)
+        {
+            return PoolSystemComposer.PoolManagerCompat.Get(type, position, quaternion);
+        }
+        
+        // Lógica legacy
         if (!poolDictionary.ContainsKey(type))
         {
             Debug.Log("Pool of type " + type + " does not exist");
@@ -73,6 +94,14 @@ public class PoolManager : MonoBehaviourSingleton<PoolManager>
     }
     public void ReturnToPool(PoolObjectType type, GameObject g)
     {
+        // Redirigir al nuevo sistema si está disponible
+        if (useNewSystem)
+        {
+            PoolSystemComposer.PoolManagerCompat.ReturnToPool(type, g);
+            return;
+        }
+        
+        // Lógica legacy
         g.SetActive(false);
         g.transform.SetParent(poolDictionary[type].Container.transform);
         poolDictionary[type].Queue.Enqueue(g);

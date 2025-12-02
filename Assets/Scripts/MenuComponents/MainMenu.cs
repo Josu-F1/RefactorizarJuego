@@ -1,16 +1,18 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Obsolete("Use MenuSystemComposer instead")]
 public class MainMenu : MonoBehaviour
 {
     public GameObject loginPanel;
     public GameObject mainMenuPanel;
-    public Text userNameText; // Asigna un Text en el menú principal para mostrar el usuario
-    public Button logoutButton; // Asigna un botón para cerrar sesión
+    public Text userNameText;
+    public Button logoutButton;
 
     void Start()
     {
-        // Si no hay usuario registrado, mostrar login
+        Debug.LogWarning("[OBSOLETE] MainMenu is deprecated. Use MenuSystemComposer instead.");
+        
         string userName = PlayerPrefs.GetString("CurrentUser", "");
         if (logoutButton != null) logoutButton.onClick.AddListener(OnLogout);
         if (string.IsNullOrEmpty(userName))

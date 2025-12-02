@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Obsolete("Use MenuSystemComposer instead")]
 public class RegisterMenu : MonoBehaviour
 {
     [Space(15)]
@@ -19,6 +20,8 @@ public class RegisterMenu : MonoBehaviour
 
     public void Start()
     {
+        Debug.LogWarning("[OBSOLETE] RegisterMenu is deprecated. Use MenuSystemComposer instead.");
+        
         usernameInput.onValueChanged.AddListener(OnChangeInput);
         registerButton.onClick.AddListener(OnContinueButton);
         
