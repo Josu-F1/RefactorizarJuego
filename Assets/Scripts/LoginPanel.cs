@@ -2,6 +2,15 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID
+/// Usar LoginSystemComposer con sistema refactorizado
+/// - Viola SRP: Mezcla UI, autenticación, navegación y persistencia
+/// - Viola DIP: Depende de implementaciones concretas (PlayerPrefs, ProgressDisplay)
+/// - Viola OCP: Difícil de extender sin modificar
+/// - Alto acoplamiento: Muchas responsabilidades en una clase
+/// </summary>
+[System.Obsolete("Use LoginSystemComposer instead. This class violates SOLID principles.")]
 public class LoginPanel : MonoBehaviour
 {
     public InputField userNameInput;
