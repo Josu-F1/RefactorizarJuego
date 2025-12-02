@@ -4,6 +4,11 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID. 
+/// Usar PlayerStatDisplayComposer con BombStatsUI, MovementStatsUI y UserInfoUI
+/// </summary>
+[System.Obsolete("Use PlayerStatDisplayComposer instead. This class violates SOLID principles.")]
 public class PlayerStatDisplay : MonoBehaviour
 {
     [SerializeField]
