@@ -50,7 +50,6 @@ public class MoveOnInput : MonoBehaviour
             keyCount++;
             direction += KeyToVector2(upKey);
         }
-        ;
         if (Input.GetKey(downKey))
         {
             keyCount++;

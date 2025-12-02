@@ -21,8 +21,16 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     private void Start()
     {
+        // Asegurar que el juego esté en estado normal al inicio
+        Time.timeScale = 1f;
+        
         Enemy.OnAnyEnemyKilled += IncreaseScore;
-        Player.Instance.OnPlayerDead += Defeat;
+        
+        // Asegurar que el Player existe antes de suscribirse
+        if (Player.Instance != null)
+        {
+            Player.Instance.OnPlayerDead += Defeat;
+        }
     }
 
     private void IncreaseScore(int score)
