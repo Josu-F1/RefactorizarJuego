@@ -2,6 +2,11 @@ using System;
 using System.Collections;
 using UnityEngine;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID.
+/// Usar GameManagerComposer con sistemas especializados
+/// </summary>
+[System.Obsolete("Use GameManagerComposer instead. This class violates SOLID principles.")]
 public class GameManager : MonoBehaviourSingleton<GameManager>
 {
     [SerializeField]
