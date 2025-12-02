@@ -53,7 +53,7 @@ public class MapDisplay : MonoBehaviourSingleton<MapDisplay>
         SetLocationTextToDefault();
         SetTooltipTextToDefault();
 
-        usernameText.text = DataManager.CurrentUsername;
+        usernameText.text = DataManagerComposer.CurrentUsername;
     }
 
     private void Update()

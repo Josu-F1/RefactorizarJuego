@@ -1,5 +1,10 @@
 using UnityEngine;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID y Repository Pattern.
+/// Usar DataManagerComposer con repositorios especializados
+/// </summary>
+[System.Obsolete("Use DataManagerComposer instead. This class violates SOLID principles.")]
 public static class DataManager
 {
     private static string currentUsername;

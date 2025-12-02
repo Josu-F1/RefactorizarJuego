@@ -5,8 +5,8 @@ using UnityEngine;
 /// <summary>
 /// OBSOLETO: Esta clase viola principios SOLID.
 /// Usar GameManagerComposer con sistemas especializados
+/// TEMPORALMENTE REACTIVADO para compatibilidad con escenas existentes
 /// </summary>
-[System.Obsolete("Use GameManagerComposer instead. This class violates SOLID principles.")]
 public class GameManager : MonoBehaviourSingleton<GameManager>
 {
     [SerializeField]
@@ -63,10 +63,25 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         OnVictory?.Invoke();
         Time.timeScale = 0;
 
-        int actualLevel = DataManager.GetPlayerLevel(DataManager.CurrentUsername);
+        // USAR EL NUEVO SISTEMA REFACTORIZADO
+        string username = DataManagerComposer.CurrentUsername;
+        int actualLevel = DataManagerComposer.GetPlayerLevel(username);
+
+        Debug.Log($"[GameManager] GUARDANDO PROGRESO - Usuario: {username}, Nivel actual: {actualLevel}, Nivel completado: {levelNumber}");
 
         if (levelNumber > actualLevel)
-            DataManager.SavePlayerLevel(DataManager.CurrentUsername, levelNumber);
+        {
+            DataManagerComposer.SavePlayerLevel(username, levelNumber);
+            Debug.Log($"[GameManager] ✅ Progreso guardado! Nuevo nivel: {levelNumber}");
+        }
+        else
+        {
+            Debug.Log($"[GameManager] Nivel ya completado anteriormente");
+        }
+        
+        // Verificar que se guardó
+        int newLevel = DataManagerComposer.GetPlayerLevel(username);
+        Debug.Log($"[GameManager] Verificación final - Nivel del jugador: {newLevel}");
     }
 
     private void Defeat()
