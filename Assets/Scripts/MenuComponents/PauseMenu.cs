@@ -1,14 +1,18 @@
 #pragma warning disable 0649
 
 using UnityEngine;
+
+[System.Obsolete("Use MenuSystemComposer instead")]
 public class PauseMenu : MonoBehaviour
 {
     private bool isPausing = false;
 
     [SerializeField]
     private GameObject pauseLayer;
+    
     private void Start()
     {
+        Debug.LogWarning("[OBSOLETE] PauseMenu is deprecated. Use MenuSystemComposer instead.");
         Resume();
     }
     public void HandlePause()
