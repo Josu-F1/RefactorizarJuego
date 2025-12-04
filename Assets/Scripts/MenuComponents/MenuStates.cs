@@ -72,22 +72,7 @@ namespace MenuSystem.States
                     Debug.Log("[UnauthenticatedState] Showing LoginPanel");
                 }
                 
-                // Ocultar otros paneles ESPECÍFICOS, no MainMenuCanvas completo
-                // Buscar elementos específicos dentro del Canvas
-                var background = GameObject.Find("Background");
-                var gameName = GameObject.Find("GameName");
-                var playButton = GameObject.Find("PlayButton");
-                var tutorialButton = GameObject.Find("TutorialButton");
-                var helpButton = GameObject.Find("HelpButton");
-                var quitButton = GameObject.Find("QuitButton");
-                
-                // Ocultar elementos del menú principal
-                if (background != null) background.SetActive(false);
-                if (gameName != null) gameName.SetActive(false);
-                if (playButton != null) playButton.SetActive(false);
-                if (tutorialButton != null) tutorialButton.SetActive(false);
-                if (helpButton != null) helpButton.SetActive(false);
-                if (quitButton != null) quitButton.SetActive(false);
+                menu.SetMainMenuElementsActive(false);
                 
                 // Ocultar otros paneles
                 if (menu.RegisterPanel != null) context.HidePanel(menu.RegisterPanel);
@@ -151,21 +136,7 @@ namespace MenuSystem.States
                     Debug.LogError("[RegisteringState] RegisterPanel is NULL!");
                 }
                 
-                // Ocultar elementos específicos del menú principal, no MainMenuCanvas completo
-                var background = GameObject.Find("Background");
-                var gameName = GameObject.Find("GameName");
-                var playButton = GameObject.Find("PlayButton");
-                var tutorialButton = GameObject.Find("TutorialButton");
-                var helpButton = GameObject.Find("HelpButton");
-                var quitButton = GameObject.Find("QuitButton");
-                
-                // Ocultar elementos del menú principal
-                if (background != null) background.SetActive(false);
-                if (gameName != null) gameName.SetActive(false);
-                if (playButton != null) playButton.SetActive(false);
-                if (tutorialButton != null) tutorialButton.SetActive(false);
-                if (helpButton != null) helpButton.SetActive(false);
-                if (quitButton != null) quitButton.SetActive(false);
+                menu.SetMainMenuElementsActive(false);
                 
                 if (menu.HelpPanel != null) context.HidePanel(menu.HelpPanel);
                 if (menu.LoadingPanel != null) context.HidePanel(menu.LoadingPanel);
@@ -253,14 +224,26 @@ namespace MenuSystem.States
             
             if (context is RefactoredMainMenu menu)
             {
-                // Ocultar paneles de autenticación
-                if (menu.LoginPanel != null) context.HidePanel(menu.LoginPanel);
-                if (menu.RegisterPanel != null) context.HidePanel(menu.RegisterPanel);
+                // Ocultar paneles de autenticación FORZADAMENTE
+                if (menu.LoginPanel != null) 
+                {
+                    menu.LoginPanel.SetActive(false);
+                    Debug.Log("[AuthenticatedState] LoginPanel force hidden");
+                }
+                if (menu.RegisterPanel != null) 
+                {
+                    menu.RegisterPanel.SetActive(false);
+                    Debug.Log("[AuthenticatedState] RegisterPanel force hidden");
+                }
                 if (menu.HelpPanel != null) context.HidePanel(menu.HelpPanel);
                 if (menu.LoadingPanel != null) context.HidePanel(menu.LoadingPanel);
                 
                 // Mostrar menú principal
                 if (menu.MainMenuPanel != null) context.ShowPanel(menu.MainMenuPanel);
+                
+                menu.SetMainMenuElementsActive(true);
+                
+                Debug.Log("[AuthenticatedState] Main menu elements activated");
             }
             
             // Actualizar texto de bienvenida

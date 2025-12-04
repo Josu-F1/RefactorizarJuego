@@ -4,6 +4,7 @@ using TMPro;
 using MenuSystem.Commands;
 using MenuSystem.States;
 using System.Reflection;
+using System.Collections.Generic;
 
 /// <summary>
 /// Menú principal refactorizado aplicando SOLID y patrones de diseño
@@ -43,6 +44,9 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     [SerializeField] private Button showLoginButton;
     [SerializeField] private Button closeHelpButton;
     
+    [Header("Main Menu Elements")]
+    [SerializeField] private GameObject[] mainMenuElements;
+    
     [Header("Authentication Components")]
     [SerializeField] private PasswordLoginComponent passwordLogin;
     [SerializeField] private UserRegistrationUI userRegistration;
@@ -57,6 +61,68 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     private ISessionManager sessionManager;
     private IAuthenticationService authService;
     
+    // Control de flujo
+    private bool loginFlowCompleted = false;
+    
+    public void SetMainMenuElementsActive(bool active)
+    {
+        EnsureMainMenuElementsCache();
+
+        if (mainMenuElements == null || mainMenuElements.Length == 0)
+        {
+            Debug.LogWarning("[RefactoredMainMenu] No main menu elements assigned to toggle");
+            return;
+        }
+
+        foreach (var element in mainMenuElements)
+        {
+            if (element == null) continue;
+            element.SetActive(active);
+        }
+    }
+
+    private void EnsureMainMenuElementsCache()
+    {
+        if (mainMenuElements != null && mainMenuElements.Length > 0) return;
+        if (mainMenuPanel == null) return;
+
+        var defaultNames = new[] { "Background", "GameName", "PlayButton", "TutorialButton", "HelpButton", "QuitButton" };
+        var collected = new System.Collections.Generic.List<GameObject>();
+
+        foreach (var name in defaultNames)
+        {
+            var child = FindChildRecursive(mainMenuPanel.transform, name);
+            if (child != null)
+            {
+                collected.Add(child.gameObject);
+            }
+        }
+
+        if (collected.Count > 0)
+        {
+            mainMenuElements = collected.ToArray();
+            Debug.Log($"[RefactoredMainMenu] Cached {collected.Count} main menu elements automatically");
+        }
+    }
+
+    private Transform FindChildRecursive(Transform parent, string targetName)
+    {
+        if (parent == null) return null;
+
+        foreach (Transform child in parent)
+        {
+            if (child.name == targetName)
+            {
+                return child;
+            }
+
+            var nested = FindChildRecursive(child, targetName);
+            if (nested != null) return nested;
+        }
+
+        return null;
+    }
+
     // Events (Observer Pattern)
     public System.Action<string> OnStateChanged;
     public System.Action<string> OnCommandExecuted;
@@ -65,8 +131,13 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     {
         InitializeSystem();
         SetupEventListeners();
-        ConfigureInitialPanels();
-        SetInitialState();
+        
+        // Solo configurar paneles y estados si no se ha completado el login
+        if (!loginFlowCompleted)
+        {
+            ConfigureInitialPanels();
+            SetInitialState();
+        }
     }
     
     private void ConfigureInitialPanels()
@@ -268,6 +339,13 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     // Input handling
     private void HandleInput(string inputType)
     {
+        // Si ya completamos el flujo de login, no manejar más inputs
+        if (loginFlowCompleted)
+        {
+            Debug.Log($"[RefactoredMainMenu] Login flow completed, ignoring input: {inputType}");
+            return;
+        }
+        
         Debug.Log($"[RefactoredMainMenu] HandleInput called with: {inputType}");
         Debug.Log($"[RefactoredMainMenu] Current state: {currentState?.StateName}");
         currentState?.HandleInput(this, inputType);
@@ -287,46 +365,86 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
         HandleInput("show_login");
     }
     
-
-    
-    public void ForceLoginWithTestUser()
+    [ContextMenu("Force Authenticated State")]
+    public void ForceAuthenticatedState()
     {
-        Debug.Log("[RefactoredMainMenu] ForceLoginWithTestUser called");
+        Debug.Log("[RefactoredMainMenu] Forcing authenticated state");
+        HandleInput("login_success");
+    }
+    
+    [ContextMenu("Debug Canvas Issues")]
+    public void DebugCanvasIssues()
+    {
+        Debug.Log("[RefactoredMainMenu] === DEBUG CANVAS ISSUES ===");
         
-        // Buscar los InputFields y asignar valores directamente
-        if (loginPanel != null)
+        if (mainMenuPanel != null)
         {
-            var inputFields = loginPanel.GetComponentsInChildren<TMP_InputField>();
-            Debug.Log($"[RefactoredMainMenu] Found {inputFields.Length} input fields");
-            
-            if (inputFields.Length >= 2)
+            var canvas = mainMenuPanel.GetComponent<Canvas>();
+            if (canvas != null)
             {
-                // Asignar valores directamente a los campos
-                inputFields[0].text = "test";  // Username field
-                inputFields[1].text = "test";  // Password field
+                Debug.Log($"[Canvas] Render Mode: {canvas.renderMode}");
+                Debug.Log($"[Canvas] Enabled: {canvas.enabled}");
+                Debug.Log($"[Canvas] Sort Order: {canvas.sortingOrder}");
                 
-                Debug.Log($"[RefactoredMainMenu] Set username: '{inputFields[0].text}' and password: '{inputFields[1].text}'");
+                if (canvas.renderMode == RenderMode.ScreenSpaceCamera)
+                {
+                    Debug.Log($"[Canvas] World Camera: {(canvas.worldCamera != null ? canvas.worldCamera.name : "NULL")}");
+                }
+            }
+            
+            var canvasGroup = mainMenuPanel.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+            {
+                Debug.Log($"[CanvasGroup] Alpha: {canvasGroup.alpha}");
+                Debug.Log($"[CanvasGroup] Interactable: {canvasGroup.interactable}");
+                Debug.Log($"[CanvasGroup] BlocksRaycasts: {canvasGroup.blocksRaycasts}");
+            }
+            
+            // Verificar la posición del Background
+            var background = GameObject.Find("Background");
+            if (background != null)
+            {
+                var rectTransform = background.GetComponent<RectTransform>();
+                if (rectTransform != null)
+                {
+                    Debug.Log($"[Background] Position: {rectTransform.anchoredPosition}");
+                    Debug.Log($"[Background] Size: {rectTransform.sizeDelta}");
+                    Debug.Log($"[Background] Scale: {rectTransform.localScale}");
+                }
                 
-                // Forzar actualización de los campos
-                inputFields[0].onValueChanged.Invoke(inputFields[0].text);
-                inputFields[1].onValueChanged.Invoke(inputFields[1].text);
-                
-                // Esperar un frame y luego hacer login
-                StartCoroutine(DelayedLogin());
+                var image = background.GetComponent<UnityEngine.UI.Image>();
+                if (image != null)
+                {
+                    Debug.Log($"[Background] Color: {image.color}");
+                    Debug.Log($"[Background] Sprite: {(image.sprite != null ? image.sprite.name : "NULL")}");
+                }
             }
         }
     }
     
-    private System.Collections.IEnumerator DelayedLogin()
+
+    
+    public void ForceLoginWithTestUser()
     {
-        yield return null; // Esperar un frame
+        Debug.Log("[RefactoredMainMenu] ForceLoginWithTestUser called - forcing login success");
         
-        var loginComponent = loginPanel.GetComponentInChildren<PasswordLoginComponent>();
-        if (loginComponent != null)
+        // Primero ocultar LoginPanel directamente
+        if (loginPanel != null)
         {
-            Debug.Log("[RefactoredMainMenu] Calling OnLoginClick after setting fields");
-            loginComponent.OnLoginClick();
+            loginPanel.SetActive(false);
+            Debug.Log("[RefactoredMainMenu] LoginPanel hidden directly");
         }
+        
+        // Activar Background directamente (más visible)
+        var background = GameObject.Find("Background");
+        if (background != null)
+        {
+            background.SetActive(true);
+            Debug.Log("[RefactoredMainMenu] Background activated directly");
+        }
+        
+        // Simular directamente un login exitoso
+        OnLoginSuccess("test");
     }
     
     public void AttemptRegistration()
@@ -369,7 +487,26 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     private void OnLoginSuccess(string username)
     {
         Debug.Log($"[RefactoredMainMenu] Login successful for: {username}");
-        HandleInput("login_success");
+        
+        // Simplemente mostrar el menú original SIN desactivar el componente
+        ShowOriginalMenu();
+        
+        // Marcar que ya terminamos el flujo de login
+        loginFlowCompleted = true;
+        Debug.Log("[RefactoredMainMenu] Login flow completed - menu now active");
+    }
+    
+    private void ShowOriginalMenu()
+    {
+        // Ocultar login/register panels
+        if (loginPanel != null) loginPanel.SetActive(false);
+        if (registerPanel != null) registerPanel.SetActive(false);
+        
+        // Mostrar el menú principal original
+        if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
+        
+        // Activar todos los elementos del menú mediante referencias directas
+        SetMainMenuElementsActive(true);
     }
     
     private void OnLoginFailed(string error)
@@ -381,11 +518,13 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     private void OnRegistrationSuccess(string username)
     {
         Debug.Log($"[RefactoredMainMenu] Registration successful for: {username}");
-        
-        // Mostrar mensaje de éxito en consola por ahora
         Debug.Log($"¡Usuario '{username}' registrado exitosamente! Ahora puedes hacer login.");
         
-        HandleInput("registration_success");
+        // Después del registro exitoso, volver al login
+        if (loginPanel != null) loginPanel.SetActive(true);
+        if (registerPanel != null) registerPanel.SetActive(false);
+        
+        Debug.Log("[RefactoredMainMenu] Returned to login after successful registration");
     }
     
     private void OnRegistrationFailed(string error)
