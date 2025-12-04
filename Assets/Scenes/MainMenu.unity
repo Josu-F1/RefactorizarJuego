@@ -1553,11 +1553,11 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1687846304}
         m_TargetAssemblyTypeName: RefactoredMainMenu, Assembly-CSharp
-        m_MethodName: ShowPanel
-        m_Mode: 2
+        m_MethodName: ForceLoginWithTestUser
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.GameObject, UnityEngine
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -4697,7 +4697,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1687846304
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4724,8 +4724,11 @@ MonoBehaviour:
   showRegisterButton: {fileID: 704153763}
   showLoginButton: {fileID: 1229434195}
   closeHelpButton: {fileID: 1005986934}
+  mainMenuElements: []
   passwordLogin: {fileID: 1594028475}
   userRegistration: {fileID: 361997317}
+  startWithLogin: 1
+  clearSessionOnStart: 1
 --- !u!4 &1687846305
 Transform:
   m_ObjectHideFlags: 0
@@ -5860,5 +5863,5 @@ SceneRoots:
   - {fileID: 302994241}
   - {fileID: 1408515045}
   - {fileID: 1687846305}
-  - {fileID: 1594028476}
   - {fileID: 361997318}
+  - {fileID: 1594028476}
