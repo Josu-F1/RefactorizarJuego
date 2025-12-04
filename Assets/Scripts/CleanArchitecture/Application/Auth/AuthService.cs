@@ -20,7 +20,7 @@ namespace CleanArchitecture.Application.Auth
 
         public AuthResult Register(string username)
         {
-            var creds = new UserCredentials(username);
+            var creds = new CleanArchitecture.Domain.Auth.UserCredentials(username);
             var result = repository.Register(creds);
             if (result.Success)
             {
@@ -31,7 +31,7 @@ namespace CleanArchitecture.Application.Auth
 
         public AuthResult Login(string username)
         {
-            var creds = new UserCredentials(username);
+            var creds = new CleanArchitecture.Domain.Auth.UserCredentials(username);
             var result = repository.Login(creds);
             if (result.Success)
             {

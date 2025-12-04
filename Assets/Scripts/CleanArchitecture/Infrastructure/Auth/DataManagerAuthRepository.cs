@@ -8,7 +8,7 @@ namespace CleanArchitecture.Infrastructure.Auth
 {
     public class DataManagerAuthRepository : IUserAuthRepository
     {
-        public AuthResult Register(UserCredentials credentials)
+        public AuthResult Register(CleanArchitecture.Domain.Auth.UserCredentials credentials)
         {
             if (!credentials.IsValid)
             {
@@ -24,7 +24,7 @@ namespace CleanArchitecture.Infrastructure.Auth
             return AuthResult.Ok;
         }
 
-        public AuthResult Login(UserCredentials credentials)
+        public AuthResult Login(CleanArchitecture.Domain.Auth.UserCredentials credentials)
         {
             if (!credentials.IsValid)
             {
