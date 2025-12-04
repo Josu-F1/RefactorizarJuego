@@ -151,7 +151,22 @@ namespace MenuSystem.States
                     Debug.LogError("[RegisteringState] RegisterPanel is NULL!");
                 }
                 
-                if (menu.MainMenuPanel != null) context.HidePanel(menu.MainMenuPanel);
+                // Ocultar elementos específicos del menú principal, no MainMenuCanvas completo
+                var background = GameObject.Find("Background");
+                var gameName = GameObject.Find("GameName");
+                var playButton = GameObject.Find("PlayButton");
+                var tutorialButton = GameObject.Find("TutorialButton");
+                var helpButton = GameObject.Find("HelpButton");
+                var quitButton = GameObject.Find("QuitButton");
+                
+                // Ocultar elementos del menú principal
+                if (background != null) background.SetActive(false);
+                if (gameName != null) gameName.SetActive(false);
+                if (playButton != null) playButton.SetActive(false);
+                if (tutorialButton != null) tutorialButton.SetActive(false);
+                if (helpButton != null) helpButton.SetActive(false);
+                if (quitButton != null) quitButton.SetActive(false);
+                
                 if (menu.HelpPanel != null) context.HidePanel(menu.HelpPanel);
                 if (menu.LoadingPanel != null) context.HidePanel(menu.LoadingPanel);
             }
@@ -162,8 +177,9 @@ namespace MenuSystem.States
             switch (inputType.ToLower())
             {
                 case "registration_success":
-                    // Después del registro exitoso, ir al menú principal autenticado
-                    context.ChangeState(new AuthenticatedState());
+                    // Después del registro exitoso, ir al login para que se autentique
+                    Debug.Log("[RegisteringState] Registration successful, going to login");
+                    context.ChangeState(new UnauthenticatedState());
                     break;
                 case "show_login":
                 case "cancel_registration":

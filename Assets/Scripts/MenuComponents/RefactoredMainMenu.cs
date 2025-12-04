@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using MenuSystem.Commands;
 using MenuSystem.States;
+using System.Reflection;
 
 /// <summary>
 /// Menú principal refactorizado aplicando SOLID y patrones de diseño
@@ -267,8 +268,89 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     // Input handling
     private void HandleInput(string inputType)
     {
+        Debug.Log($"[RefactoredMainMenu] HandleInput called with: {inputType}");
+        Debug.Log($"[RefactoredMainMenu] Current state: {currentState?.StateName}");
         currentState?.HandleInput(this, inputType);
         OnCommandExecuted?.Invoke(inputType);
+    }
+    
+    // Métodos públicos para botones (para usar en Inspector)
+    public void GoToRegister()
+    {
+        Debug.Log("[RefactoredMainMenu] GoToRegister button clicked");
+        HandleInput("show_register");
+    }
+    
+    public void GoToLogin()
+    {
+        Debug.Log("[RefactoredMainMenu] GoToLogin button clicked");
+        HandleInput("show_login");
+    }
+    
+
+    
+    public void ForceLoginWithTestUser()
+    {
+        Debug.Log("[RefactoredMainMenu] ForceLoginWithTestUser called");
+        
+        // Buscar los InputFields y asignar valores directamente
+        if (loginPanel != null)
+        {
+            var inputFields = loginPanel.GetComponentsInChildren<TMP_InputField>();
+            Debug.Log($"[RefactoredMainMenu] Found {inputFields.Length} input fields");
+            
+            if (inputFields.Length >= 2)
+            {
+                // Asignar valores directamente a los campos
+                inputFields[0].text = "test";  // Username field
+                inputFields[1].text = "test";  // Password field
+                
+                Debug.Log($"[RefactoredMainMenu] Set username: '{inputFields[0].text}' and password: '{inputFields[1].text}'");
+                
+                // Forzar actualización de los campos
+                inputFields[0].onValueChanged.Invoke(inputFields[0].text);
+                inputFields[1].onValueChanged.Invoke(inputFields[1].text);
+                
+                // Esperar un frame y luego hacer login
+                StartCoroutine(DelayedLogin());
+            }
+        }
+    }
+    
+    private System.Collections.IEnumerator DelayedLogin()
+    {
+        yield return null; // Esperar un frame
+        
+        var loginComponent = loginPanel.GetComponentInChildren<PasswordLoginComponent>();
+        if (loginComponent != null)
+        {
+            Debug.Log("[RefactoredMainMenu] Calling OnLoginClick after setting fields");
+            loginComponent.OnLoginClick();
+        }
+    }
+    
+    public void AttemptRegistration()
+    {
+        Debug.Log("[RefactoredMainMenu] AttemptRegistration button clicked");
+        
+        // Usar la referencia directa del Inspector
+        if (userRegistration != null)
+        {
+            Debug.Log("[RefactoredMainMenu] Found UserRegistration component, attempting registration");
+            
+            // Asegurar que los eventos estén conectados antes de registrar
+            if (authService != null)
+            {
+                authService.OnUserRegistered += OnRegistrationSuccess;
+                authService.OnAuthenticationFailed += OnRegistrationFailed;
+            }
+            
+            userRegistration.AttemptRegistration();
+        }
+        else
+        {
+            Debug.LogError("[RefactoredMainMenu] UserRegistration component is null! Make sure it's assigned in Inspector.");
+        }
     }
     
     // Command execution methods
@@ -299,6 +381,10 @@ public class RefactoredMainMenu : MonoBehaviour, IMenuStateContext
     private void OnRegistrationSuccess(string username)
     {
         Debug.Log($"[RefactoredMainMenu] Registration successful for: {username}");
+        
+        // Mostrar mensaje de éxito en consola por ahora
+        Debug.Log($"¡Usuario '{username}' registrado exitosamente! Ahora puedes hacer login.");
+        
         HandleInput("registration_success");
     }
     
