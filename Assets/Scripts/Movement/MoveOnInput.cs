@@ -2,6 +2,11 @@
 
 using UnityEngine;
 
+/// <summary>
+/// OBSOLETO: Esta clase viola principios SOLID y Command Pattern.
+/// Usar MovementController con handlers especializados
+/// </summary>
+[System.Obsolete("Use MovementController instead. This class violates SOLID principles.")]
 [RequireComponent(typeof(MoveComponent))]
 public class MoveOnInput : MonoBehaviour
 {
@@ -50,7 +55,6 @@ public class MoveOnInput : MonoBehaviour
             keyCount++;
             direction += KeyToVector2(upKey);
         }
-        ;
         if (Input.GetKey(downKey))
         {
             keyCount++;

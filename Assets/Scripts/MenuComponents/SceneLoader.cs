@@ -2,21 +2,26 @@
 
 using UnityEngine;
 using UnityEngine.SceneManagement;
+
 public class SceneLoader : MonoBehaviour
 {
     public static string levelKey = "Level";
+
     public static void Load(int sceneNumber)
     {
         SceneManager.LoadScene(sceneNumber, LoadSceneMode.Single);
     }
+
     public static void Load(string sceneName)
     {
         SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
     }
+
     public static void LoadCurrentScene()
     {
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
     }
+
     public static void LoadSelectedScene()
     {
         string sceneName = PlayerPrefs.GetString(levelKey, "MainMenu");
@@ -30,4 +35,3 @@ public class SceneLoader : MonoBehaviour
         }
     }
 }
-

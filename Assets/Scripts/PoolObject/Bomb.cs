@@ -15,7 +15,7 @@ public class Bomb : PoolObject
     private int length = 2;
     public float Damage { get; set; }
     public CharacterType CharacterType { get; set; }
-    public BombSpawner BombSpawner { get; set; }
+    public IBombSpawnerReference BombSpawner { get; set; }
     public int Length { get => length; set => length = value; }
     public float Lifetime { get => lifetime; set => lifetime = value; }
     public ObjectPool ExplosionPool { get; set; }
