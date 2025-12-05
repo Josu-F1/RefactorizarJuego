@@ -31,7 +31,8 @@ public class PlayerStatDisplay : MonoBehaviour
         moveComponent.OnMoveSpeedChanged += UpdateMoveSpeedText;
         UpdateAll();
 
-        usernameText.text = DataManager.CurrentUsername;
+        Debug.Log("Nombre de usuario actual: " + DataManagerComposer.CurrentUsername);
+        usernameText.text = DataManagerComposer.CurrentUsername;
     }
 
     private void UpdateMoveSpeedText()
