@@ -7,102 +7,99 @@ public class RegisterMenu : MonoBehaviour
 {
     [Space(15)]
     public TMP_InputField usernameInput;
+    public TMP_InputField passwordInput; // Nuevo campo para el input de contraseña
     public Button registerButton;
-    
-    [Space(15)]
-    [Header("Recent Users")]
-    public Button recentUser1Button;
-    public Button recentUser2Button;
-    public Button recentUser3Button;
-    public TextMeshProUGUI recentUsersTitle;
-
-    private Button[] recentUserButtons;
+    public Button loginButton;
 
     public void Start()
     {
         Debug.LogWarning("[OBSOLETE] RegisterMenu is deprecated. Use MenuSystemComposer instead.");
-        
+
         usernameInput.onValueChanged.AddListener(OnChangeInput);
-        registerButton.onClick.AddListener(OnContinueButton);
-        
-        // Inicializar botones de usuarios recientes
-        recentUserButtons = new Button[] { recentUser1Button, recentUser2Button, recentUser3Button };
-        
-        SetupRecentUsers();
+        passwordInput.onValueChanged.AddListener(OnChangeInput);
+        registerButton.onClick.AddListener(OnRegisterButton);
+        loginButton.onClick.AddListener(OnLoginButton);
+
+        // Initialize buttons as non-interactable
+        registerButton.interactable = false;
+        loginButton.interactable = false;
     }
 
     private void OnChangeInput(string input)
     {
-        usernameInput.text = input.ToUpper();
-        registerButton.interactable = !string.IsNullOrEmpty(input);
+        // Normalizar el username sin disparar eventos
+        usernameInput.SetTextWithoutNotify(usernameInput.text.ToUpper());
+
+        bool hasInput =
+            !string.IsNullOrEmpty(usernameInput.text) &&
+            !string.IsNullOrEmpty(passwordInput.text);
+
+        registerButton.interactable = hasInput;
+        loginButton.interactable = hasInput;
     }
 
-    private void OnContinueButton()
+
+    private void OnRegisterButton()
     {
-        LoginWithUsername(usernameInput.text);
+        string username = usernameInput.text;
+        string password = passwordInput.text;
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) return;
+
+        UserProgress existingUser = UserProgressManager.LoadProgress(username);
+
+        if (existingUser == null)
+        {
+            // Crear nuevo usuario
+            UserProgress newUser = new UserProgress
+            {
+                userName = username,
+                password = password, // Guardar contraseña en texto plano (NO RECOMENDADO para producción)
+                level = 1,
+                points = 0
+            };
+            UserProgressManager.SaveProgress(newUser);
+            LoginWithUsername(username);
+        }
+        else
+        {
+            Debug.Log("Username already exists. Please use Login instead.");
+        }
     }
-    
+
+    private void OnLoginButton()
+    {
+        string username = usernameInput.text;
+        string password = passwordInput.text;
+
+        if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password)) return;
+
+        UserProgress user = UserProgressManager.LoadProgress(username);
+
+        if (user != null)
+        {
+            // Verificar contraseña (comparación directa sin hash)
+            if (user.password == password)
+            {
+                LoginWithUsername(username);
+            }
+            else
+            {
+                Debug.Log("Incorrect password.");
+            }
+        }
+        else
+        {
+            Debug.Log("Username not found. Please register first.");
+        }
+    }
+
     private void LoginWithUsername(string username)
     {
         if (string.IsNullOrEmpty(username)) return;
 
         DataManagerComposer.CurrentUsername = username;
-
-        if (!DataManagerComposer.UsernameExists(username))
-        {
-            DataManagerComposer.SaveUsername(username);
-        }
-        else
-        {
-            // Si el usuario ya existe, agregarlo a recientes
-            DataManagerComposer.AddRecentUsername(username);
-        }
-
+        DataManagerComposer.AddRecentUsername(username);
         SceneLoader.Load("Lobby");
-    }
-    
-    private void SetupRecentUsers()
-    {
-        string[] recentUsers = DataManagerComposer.GetRecentUsernames(3);
-        
-        // Mostrar/ocultar título si hay usuarios recientes
-        if (recentUsersTitle != null)
-        {
-            recentUsersTitle.gameObject.SetActive(recentUsers.Length > 0);
-        }
-        
-        for (int i = 0; i < recentUserButtons.Length; i++)
-        {
-            if (recentUserButtons[i] != null)
-            {
-                if (i < recentUsers.Length && !string.IsNullOrEmpty(recentUsers[i]))
-                {
-                    // Configurar botón con nombre de usuario
-                    recentUserButtons[i].gameObject.SetActive(true);
-                    
-                    // Actualizar texto del botón
-                    TextMeshProUGUI buttonText = recentUserButtons[i].GetComponentInChildren<TextMeshProUGUI>();
-                    if (buttonText != null)
-                    {
-                        buttonText.text = recentUsers[i];
-                    }
-                    
-                    // Configurar callback (capturar variable local)
-                    string userToLogin = recentUsers[i];
-                    recentUserButtons[i].onClick.RemoveAllListeners();
-                    recentUserButtons[i].onClick.AddListener(() => OnRecentUserSelected(userToLogin));
-                }
-                else
-                {
-                    // Ocultar botón si no hay usuario
-                    recentUserButtons[i].gameObject.SetActive(false);
-                }
-            }
-        }
-    }
-    
-    private void OnRecentUserSelected(string username)
-    {
-        LoginWithUsername(username);
     }
 }
