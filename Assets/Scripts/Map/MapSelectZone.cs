@@ -1,49 +1,27 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class MapSelectZone : MonoBehaviour
 {
-    [SerializeField]
-    private string mapSceneName;
-
-    private bool isTriggeredByPlayer;
+    [SerializeField] private string mapSceneName;
+    private bool isTriggeredByPlayer = false;
     private MapDisplay mapDisplay;
-
-    private bool isLocked = true;
-    public bool IsLocked
-    {
-        get => isLocked;
-        set => isLocked = value;
-    }
-
-    public void Start()
+    private void Start()
     {
         mapDisplay = MapDisplay.Instance;
     }
-
-    public void OnTriggerEnter2D(Collider2D other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.GetComponent<Player>() == null)
-            return;
-
+        if (other.GetComponent<Player>() == null) return;
         isTriggeredByPlayer = true;
         mapDisplay.VisitedMapSceneName = mapSceneName;
-        mapDisplay.IsLocked = isLocked;
-
-        if (isLocked)
-            mapDisplay.SetTooltipText("Map Locked");
-        else
-            mapDisplay.SetTooltipText(
-                string.Format("Press {0} to enter", mapDisplay.DisplayKey.ToString())
-            );
-
+        mapDisplay.SetTooltipText(string.Format("Press {0} to continue", mapDisplay.DisplayKey.ToString()));
         mapDisplay.SetLocationText(mapSceneName);
     }
-
-    public void OnTriggerExit2D(Collider2D other)
+    private void OnTriggerExit2D(Collider2D other)
     {
-        if (other.GetComponent<Player>() == null)
-            return;
-
+        if (other.GetComponent<Player>() == null) return;
         isTriggeredByPlayer = false;
         mapDisplay.VisitedMapSceneName = null;
         mapDisplay.SetLocationTextToDefault();

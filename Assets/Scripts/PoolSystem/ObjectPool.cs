@@ -1,11 +1,5 @@
 using UnityEngine;
-using PoolSystem;
 
-/// <summary>
-/// OBSOLETO: Usar PoolSystemComposer.PoolComponent en su lugar
-/// Mantenido solo para compatibilidad temporal
-/// </summary>
-[System.Obsolete("Use PoolSystemComposer.PoolComponent instead. This will be removed in future versions.")]
 [System.Serializable]
 public class ObjectPool
 {
@@ -15,23 +9,10 @@ public class ObjectPool
 
     public GameObject Get(Vector3 position, Quaternion quaternion)
     {
-        // Usar nuevo sistema si está disponible
-        if (PoolSystemComposer.Instance != null)
-        {
-            GameObject g = PoolSystemComposer.PoolManagerCompat.Get(type, position, quaternion);
-            if (g != null)
-            {
-                var sr = g.GetComponentInChildren<SpriteRenderer>();
-                if (sr != null) sr.color = color;
-                return g;
-            }
-        }
-        
-        // Fallback al sistema legacy
-        GameObject legacyObj = PoolManager.Instance.Get(type, position, quaternion);
-        var legacySr = legacyObj?.GetComponentInChildren<SpriteRenderer>();
-        if (legacySr != null) legacySr.color = color;
-        return legacyObj;
+        GameObject g = PoolManager.Instance.Get(type, position, quaternion);
+        var sr = g.GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) sr.color = color;
+        return g;
     }
     public GameObject Get(Vector3 position)
     {

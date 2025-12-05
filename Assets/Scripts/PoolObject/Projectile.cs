@@ -3,7 +3,6 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-// Enhanced for compatibility with new ShootingSystemComposer
 [RequireComponent(typeof(Rigidbody2D))]
 public class Projectile : PoolObject
 {

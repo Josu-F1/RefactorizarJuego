@@ -1,25 +1,14 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using TMPro;
+using System;
 
-/// <summary>
-/// OBSOLETO: Esta clase viola principios SOLID. 
-/// Usar PlayerStatDisplayComposer con BombStatsUI, MovementStatsUI y UserInfoUI
-/// </summary>
-[System.Obsolete("Use PlayerStatDisplayComposer instead. This class violates SOLID principles.")]
 public class PlayerStatDisplay : MonoBehaviour
 {
-    [SerializeField]
-    private TextMeshProUGUI bombLimitText,
-        damageText,
-        lengthText,
-        moveSpeedText,
-        usernameText;
+    [SerializeField] private TextMeshProUGUI bombLimitText, damageText, lengthText, moveSpeedText;
     private BombSpawner bombSpawner;
     private MoveComponent moveComponent;
-
     private void Start()
     {
         Player player = Player.Instance;
@@ -30,9 +19,6 @@ public class PlayerStatDisplay : MonoBehaviour
         bombSpawner.OnLengthChanged += UpdateLengthText;
         moveComponent.OnMoveSpeedChanged += UpdateMoveSpeedText;
         UpdateAll();
-
-        Debug.Log("Nombre de usuario actual: " + DataManagerComposer.CurrentUsername);
-        usernameText.text = DataManagerComposer.CurrentUsername;
     }
 
     private void UpdateMoveSpeedText()
@@ -54,7 +40,6 @@ public class PlayerStatDisplay : MonoBehaviour
     {
         bombLimitText.text = bombSpawner.BombLimit.ToString();
     }
-
     private void UpdateAll()
     {
         UpdateMoveSpeedText();
@@ -62,7 +47,6 @@ public class PlayerStatDisplay : MonoBehaviour
         UpdateDamageText();
         UpdateBombLimitText();
     }
-
     private void OnDestroy()
     {
         bombSpawner.OnBombLimitChanged -= UpdateBombLimitText;

@@ -1,8 +1,6 @@
 #pragma warning disable 0649
 
 using UnityEngine;
-
-[System.Obsolete("ShootComponent is deprecated. Use ShooterComponent instead.")]
 public class ShootComponent : MonoBehaviour
 {
     [SerializeField] private ObjectPool projectilePool;

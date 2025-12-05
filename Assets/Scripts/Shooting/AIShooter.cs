@@ -1,6 +1,5 @@
 using UnityEngine;
 
-[System.Obsolete("AIShooter is deprecated. Use ShooterComponent with AI settings instead.")]
 [RequireComponent(typeof(ShootComponent))]
 public class AIShooter : MonoBehaviour
 {

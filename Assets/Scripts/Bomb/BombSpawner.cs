@@ -4,12 +4,7 @@ using UnityEngine.Events;
 using Vector2Extensions;
 using System;
 
-/// <summary>
-/// OBSOLETO: Esta clase viola principios SOLID y Factory Pattern.
-/// Usar BombSpawnerComposer con sistemas especializados
-/// </summary>
-[System.Obsolete("Use BombSpawnerComposer instead. This class violates SOLID principles.")]
-public class BombSpawner : MonoBehaviour, IBombSpawnerReference
+public class BombSpawner : MonoBehaviour
 {
     [SerializeField] private ObjectPool bombPool;
     [SerializeField] private ObjectPool explosionPool;

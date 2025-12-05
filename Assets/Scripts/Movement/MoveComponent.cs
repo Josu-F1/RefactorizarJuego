@@ -1,7 +1,7 @@
 using UnityEngine;
 using System;
 
-public class MoveComponent : MonoBehaviour, IMovementExecutor
+public class MoveComponent : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 2f;
     public Action OnMoveSpeedChanged { get; set; }
