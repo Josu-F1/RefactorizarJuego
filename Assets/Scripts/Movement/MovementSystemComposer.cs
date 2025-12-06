@@ -2,33 +2,34 @@ using UnityEngine;
 using System.Collections.Generic;
 
 /// <summary>
-/// Sistema de movimiento refactorizado usando Command Pattern y SOLID
-/// Principio: Single Responsibility Principle (SRP) - Solo orquesta el movimiento
-/// Principio: Open/Closed Principle (OCP) - Extensible para nuevos tipos de movimiento
-/// Patrón: Command Pattern - Comandos de movimiento desacoplados
-/// Patrón: Strategy Pattern - Diferentes estrategias de movimiento
-/// Patrón: Facade Pattern - Simplifica acceso al sistema de movimiento
+/// Sistema de movimiento refactorizado aplicando Clean Architecture
+/// Patrón: Facade + Strategy + Command
+/// Principios: SRP, OCP, DIP
 /// </summary>
 public class MovementSystemComposer : MonoBehaviourSingleton<MovementSystemComposer>
 {
-    [Header("Movement Configuration")]
+    [Header("Configuration")]
     [SerializeField] private bool enableDebugLogging = false;
-    [SerializeField] private float defaultMoveSpeed = 5f;
     
-    // Registry de controllers
-    private Dictionary<GameObject, IMovementController> movementControllers = new Dictionary<GameObject, IMovementController>();
+    private Dictionary<GameObject, IMovementController> controllers = new Dictionary<GameObject, IMovementController>();
+    private MovementService movementService;
     
     protected override void Awake()
     {
         base.Awake();
+        InitializeSystem();
+    }
+    
+    private void InitializeSystem()
+    {
+        movementService = new MovementService();
+        
         if (enableDebugLogging)
             Debug.Log("[MovementSystemComposer] ✅ Sistema inicializado");
     }
     
-    #region Public API
-    
     /// <summary>
-    /// Crea un controller de movimiento para un GameObject
+    /// Crea un controlador de movimiento para un GameObject
     /// </summary>
     public IMovementController CreateMovementController(GameObject target, MovementConfig config = null)
     {
@@ -38,12 +39,11 @@ public class MovementSystemComposer : MonoBehaviourSingleton<MovementSystemCompo
             return null;
         }
         
-        // Si ya existe, retornarlo
-        if (movementControllers.ContainsKey(target))
+        if (controllers.ContainsKey(target))
         {
             if (enableDebugLogging)
-                Debug.Log($"[MovementSystemComposer] Controller ya existe para {target.name}");
-            return movementControllers[target];
+                Debug.LogWarning($"[MovementSystemComposer] Ya existe un controller para {target.name}");
+            return controllers[target];
         }
         
         // Configuración por defecto si no se proporciona
@@ -51,19 +51,20 @@ public class MovementSystemComposer : MonoBehaviourSingleton<MovementSystemCompo
         {
             config = new MovementConfig
             {
-                moveSpeed = defaultMoveSpeed,
-                movementType = MovementType.Grid,
-                useRigidbody = true,
-                enableRotation = true
+                moveSpeed = 5f,
+                movementType = MovementType.GridBased,
+                useRigidbody = false,
+                smoothMovement = true
             };
         }
         
-        // Crear controller según tipo
-        IMovementController controller = CreateController(target, config);
+        // Crear controller basado en tipo
+        IMovementController controller = CreateControllerByType(target, config);
         
         if (controller != null)
         {
-            movementControllers[target] = controller;
+            controllers[target] = controller;
+            
             if (enableDebugLogging)
                 Debug.Log($"[MovementSystemComposer] ✅ Controller creado para {target.name}");
         }
@@ -71,303 +72,233 @@ public class MovementSystemComposer : MonoBehaviourSingleton<MovementSystemCompo
         return controller;
     }
     
+    private IMovementController CreateControllerByType(GameObject target, MovementConfig config)
+    {
+        // Obtener o agregar componente de movimiento
+        var moveComponent = target.GetComponent<MoveComponent>();
+        if (moveComponent == null)
+        {
+            moveComponent = target.AddComponent<MoveComponent>();
+        }
+        
+        // Configurar velocidad
+        moveComponent.SetMoveSpeed(config.moveSpeed);
+        
+        // Crear estrategia de movimiento
+        IMovementStrategy strategy = config.movementType switch
+        {
+            MovementType.GridBased => new GridMovementStrategy(),
+            MovementType.Smooth => new SmoothMovementStrategy(),
+            MovementType.Physics => new PhysicsMovementStrategy(),
+            _ => new GridMovementStrategy()
+        };
+        
+        // Crear input handler con configuración por defecto
+        var inputConfig = new KeyboardMovementConfig(KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D);
+        IInputHandler inputHandler = new KeyboardMovementInputHandler(inputConfig);
+        
+        // Crear y retornar controller
+        return new ModernMovementController(target, moveComponent, strategy, inputHandler);
+    }
+    
     /// <summary>
-    /// Obtiene un controller existente
+    /// Obtiene el controller de un GameObject
     /// </summary>
     public IMovementController GetController(GameObject target)
     {
         if (target == null) return null;
-        
-        movementControllers.TryGetValue(target, out var controller);
+        controllers.TryGetValue(target, out var controller);
         return controller;
     }
     
     /// <summary>
-    /// Mueve un GameObject usando su controller
+    /// Mueve un GameObject usando el servicio
     /// </summary>
-    public void Move(GameObject target, Vector2 direction)
+    public void MoveObject(GameObject target, Vector2 direction, float speed)
     {
+        if (target == null) return;
+        
         var controller = GetController(target);
         if (controller != null)
         {
             controller.Move(direction);
         }
-        else if (enableDebugLogging)
+        else
         {
-            Debug.LogWarning($"[MovementSystemComposer] No hay controller para {target.name}");
+            // Fallback directo
+            target.transform.Translate(direction * speed * Time.deltaTime);
         }
     }
     
     /// <summary>
-    /// Cambia la velocidad de movimiento
-    /// </summary>
-    public void SetSpeed(GameObject target, float newSpeed)
-    {
-        var controller = GetController(target);
-        if (controller != null)
-        {
-            controller.SetSpeed(newSpeed);
-        }
-    }
-    
-    /// <summary>
-    /// Detiene el movimiento de un GameObject
-    /// </summary>
-    public void Stop(GameObject target)
-    {
-        var controller = GetController(target);
-        controller?.Stop();
-    }
-    
-    /// <summary>
-    /// Limpia un controller cuando el GameObject se destruye
+    /// Limpia el controller de un GameObject
     /// </summary>
     public void CleanupController(GameObject target)
     {
-        if (target != null && movementControllers.ContainsKey(target))
+        if (target == null) return;
+        
+        if (controllers.ContainsKey(target))
         {
-            movementControllers.Remove(target);
+            controllers.Remove(target);
+            
             if (enableDebugLogging)
                 Debug.Log($"[MovementSystemComposer] Controller limpiado para {target.name}");
         }
     }
     
-    #endregion
-    
-    #region Private Methods
-    
-    private IMovementController CreateController(GameObject target, MovementConfig config)
-    {
-        switch (config.movementType)
-        {
-            case MovementType.Grid:
-                return new GridMovementController(target, config);
-            
-            case MovementType.Free:
-                return new FreeMovementController(target, config);
-            
-            case MovementType.Physics:
-                return new PhysicsMovementController(target, config);
-            
-            default:
-                Debug.LogError($"[MovementSystemComposer] Tipo de movimiento no soportado: {config.movementType}");
-                return null;
-        }
-    }
-    
-    #endregion
-    
-    #region Compatibility API (Legacy Integration)
-    
     /// <summary>
-    /// API de compatibilidad para MoveComponent legacy
+    /// Limpia todos los controllers
     /// </summary>
-    public void RegisterLegacyMoveComponent(MoveComponent moveComponent)
+    public void CleanupAll()
     {
-        if (moveComponent == null) return;
-        
-        var config = new MovementConfig
-        {
-            moveSpeed = moveComponent.MoveSpeed,
-            movementType = MovementType.Grid,
-            useRigidbody = true,
-            enableRotation = true
-        };
-        
-        CreateMovementController(moveComponent.gameObject, config);
+        controllers.Clear();
+        if (enableDebugLogging)
+            Debug.Log("[MovementSystemComposer] Todos los controllers limpiados");
     }
     
-    #endregion
+    private void OnDestroy()
+    {
+        CleanupAll();
+    }
 }
 
-#region Movement Interfaces
-
-public interface IMovementController
-{
-    void Move(Vector2 direction);
-    void Stop();
-    void SetSpeed(float speed);
-    float GetSpeed();
-}
-
-#endregion
-
-#region Movement Configurations
-
-[System.Serializable]
+/// <summary>
+/// Configuración para crear un MovementController
+/// </summary>
 public class MovementConfig
 {
     public float moveSpeed = 5f;
-    public MovementType movementType = MovementType.Grid;
-    public bool useRigidbody = true;
-    public bool enableRotation = true;
-    public bool canMoveWhileAttacking = true;
+    public MovementType movementType = MovementType.GridBased;
+    public bool useRigidbody = false;
+    public bool smoothMovement = true;
 }
 
+/// <summary>
+/// Tipos de movimiento disponibles
+/// </summary>
 public enum MovementType
 {
-    Grid,       // Movimiento en grilla (Bomberman style)
-    Free,       // Movimiento libre continuo
-    Physics     // Movimiento con física (fuerzas)
+    GridBased,
+    Smooth,
+    Physics
 }
 
-#endregion
-
-#region Movement Controllers
+/// <summary>
+/// Servicio de movimiento (Application Layer)
+/// </summary>
+public class MovementService
+{
+    public void Move(GameObject target, Vector2 direction, float speed)
+    {
+        if (target == null) return;
+        target.transform.Translate(direction * speed * Time.deltaTime);
+    }
+    
+    public void MoveTowards(GameObject target, Vector3 destination, float speed)
+    {
+        if (target == null) return;
+        target.transform.position = Vector3.MoveTowards(
+            target.transform.position,
+            destination,
+            speed * Time.deltaTime
+        );
+    }
+}
 
 /// <summary>
-/// Controller para movimiento en grilla
+/// Controller de movimiento (Presentation Layer)
 /// </summary>
-public class GridMovementController : IMovementController
+public class ModernMovementController : IMovementController
 {
     private GameObject target;
-    private Rigidbody2D rb;
-    private MovementConfig config;
-    private Vector2 currentDirection;
+    private MoveComponent moveComponent;
+    private IMovementStrategy strategy;
+    private IInputHandler inputHandler;
     
-    public GridMovementController(GameObject target, MovementConfig config)
+    public ModernMovementController(GameObject target, MoveComponent moveComponent, IMovementStrategy strategy, IInputHandler inputHandler)
     {
         this.target = target;
-        this.config = config;
-        this.rb = target.GetComponent<Rigidbody2D>();
-        
-        if (rb == null && config.useRigidbody)
-        {
-            rb = target.AddComponent<Rigidbody2D>();
-            rb.gravityScale = 0;
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        }
+        this.moveComponent = moveComponent;
+        this.strategy = strategy;
+        this.inputHandler = inputHandler;
     }
     
     public void Move(Vector2 direction)
     {
-        currentDirection = direction.normalized;
+        strategy?.Execute(target, direction, moveComponent.MoveSpeed);
+    }
+    
+    public void SetStrategy(IMovementStrategy newStrategy)
+    {
+        strategy = newStrategy;
+    }
+    
+    public GameObject GetTarget() => target;
+}
+
+/// <summary>
+/// Interface para controllers de movimiento
+/// </summary>
+public interface IMovementController
+{
+    void Move(Vector2 direction);
+    void SetStrategy(IMovementStrategy newStrategy);
+    GameObject GetTarget();
+}
+
+/// <summary>
+/// Estrategias de movimiento (Strategy Pattern)
+/// </summary>
+public interface IMovementStrategy
+{
+    void Execute(GameObject target, Vector2 direction, float speed);
+}
+
+public class GridMovementStrategy : IMovementStrategy
+{
+    public void Execute(GameObject target, Vector2 direction, float speed)
+    {
+        if (target == null) return;
         
+        // Movimiento basado en grid (snap to grid)
+        Vector3 movement = new Vector3(
+            Mathf.Round(direction.x),
+            Mathf.Round(direction.y),
+            0
+        ) * speed * Time.deltaTime;
+        
+        target.transform.Translate(movement);
+    }
+}
+
+public class SmoothMovementStrategy : IMovementStrategy
+{
+    public void Execute(GameObject target, Vector2 direction, float speed)
+    {
+        if (target == null) return;
+        
+        // Movimiento suave continuo
+        Vector3 movement = new Vector3(direction.x, direction.y, 0) * speed * Time.deltaTime;
+        target.transform.Translate(movement);
+    }
+}
+
+public class PhysicsMovementStrategy : IMovementStrategy
+{
+    public void Execute(GameObject target, Vector2 direction, float speed)
+    {
+        if (target == null) return;
+        
+        var rb = target.GetComponent<Rigidbody2D>();
         if (rb != null)
         {
-            rb.velocity = currentDirection * config.moveSpeed;
+            // Movimiento basado en física
+            rb.velocity = direction * speed;
         }
         else
         {
-            target.transform.Translate(currentDirection * config.moveSpeed * Time.deltaTime);
+            // Fallback a movimiento normal
+            target.transform.Translate(new Vector3(direction.x, direction.y, 0) * speed * Time.deltaTime);
         }
-    }
-    
-    public void Stop()
-    {
-        currentDirection = Vector2.zero;
-        if (rb != null)
-        {
-            rb.velocity = Vector2.zero;
-        }
-    }
-    
-    public void SetSpeed(float speed)
-    {
-        config.moveSpeed = speed;
-    }
-    
-    public float GetSpeed()
-    {
-        return config.moveSpeed;
     }
 }
-
-/// <summary>
-/// Controller para movimiento libre
-/// </summary>
-public class FreeMovementController : IMovementController
-{
-    private GameObject target;
-    private Rigidbody2D rb;
-    private MovementConfig config;
-    
-    public FreeMovementController(GameObject target, MovementConfig config)
-    {
-        this.target = target;
-        this.config = config;
-        this.rb = target.GetComponent<Rigidbody2D>();
-    }
-    
-    public void Move(Vector2 direction)
-    {
-        Vector2 movement = direction.normalized * config.moveSpeed;
-        
-        if (rb != null)
-        {
-            rb.velocity = movement;
-        }
-        else
-        {
-            target.transform.Translate(movement * Time.deltaTime);
-        }
-    }
-    
-    public void Stop()
-    {
-        if (rb != null)
-        {
-            rb.velocity = Vector2.zero;
-        }
-    }
-    
-    public void SetSpeed(float speed)
-    {
-        config.moveSpeed = speed;
-    }
-    
-    public float GetSpeed()
-    {
-        return config.moveSpeed;
-    }
-}
-
-/// <summary>
-/// Controller para movimiento basado en física
-/// </summary>
-public class PhysicsMovementController : IMovementController
-{
-    private GameObject target;
-    private Rigidbody2D rb;
-    private MovementConfig config;
-    
-    public PhysicsMovementController(GameObject target, MovementConfig config)
-    {
-        this.target = target;
-        this.config = config;
-        this.rb = target.GetComponent<Rigidbody2D>();
-        
-        if (rb == null)
-        {
-            rb = target.AddComponent<Rigidbody2D>();
-            rb.gravityScale = 0;
-        }
-    }
-    
-    public void Move(Vector2 direction)
-    {
-        Vector2 force = direction.normalized * config.moveSpeed;
-        rb.AddForce(force, ForceMode2D.Force);
-    }
-    
-    public void Stop()
-    {
-        if (rb != null)
-        {
-            rb.velocity = Vector2.zero;
-            rb.angularVelocity = 0f;
-        }
-    }
-    
-    public void SetSpeed(float speed)
-    {
-        config.moveSpeed = speed;
-    }
-    
-    public float GetSpeed()
-    {
-        return config.moveSpeed;
-    }
-}
-
-#endregion

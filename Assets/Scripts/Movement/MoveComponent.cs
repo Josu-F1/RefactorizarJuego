@@ -30,4 +30,20 @@ public class MoveComponent : MonoBehaviour, IMovementExecutor
     {
         rb.MovePosition(Vector2.MoveTowards(rb.position, destination, -moveSpeed * Time.deltaTime));
     }
+    
+    // Métodos para MovementSystemComposer
+    public void SetMoveSpeed(float speed)
+    {
+        MoveSpeed = speed;
+    }
+    
+    public void IncreaseMoveSpeed(float amount)
+    {
+        MoveSpeed += amount;
+    }
+    
+    public void DecreaseMoveSpeed(float amount)
+    {
+        MoveSpeed = Mathf.Max(0, MoveSpeed - amount);
+    }
 }
