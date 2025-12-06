@@ -46,7 +46,7 @@ public class FloatingTextSpawner : MonoBehaviour
     private void InitializeLegacySystem()
     {
         playerTransform = Player.Instance.transform;
-        Health.OnAnyCharacterHealthChanged += SpawnDamageText;
+        global::Health.OnAnyCharacterHealthChanged += SpawnDamageText;
         Enemy.OnAnyEnemyKilled += SpawnScoreText;
     }
     
@@ -77,7 +77,7 @@ public class FloatingTextSpawner : MonoBehaviour
     /// OBSOLETO: El VFXGameEventObserver maneja esto automáticamente
     /// </summary>
     [System.Obsolete("VFXGameEventObserver handles this automatically", false)]
-    private void SpawnDamageText(float changedAmount, Health health)
+    private void SpawnDamageText(float changedAmount, global::Health health)
     {
         // Usar sistema refactorizado si está disponible
         if (vfxSystemComposer != null)
@@ -105,7 +105,7 @@ public class FloatingTextSpawner : MonoBehaviour
         // Solo limpiar eventos legacy
         if (vfxSystemComposer == null)
         {
-            Health.OnAnyCharacterHealthChanged -= SpawnDamageText;
+            global::Health.OnAnyCharacterHealthChanged -= SpawnDamageText;
             Enemy.OnAnyEnemyKilled -= SpawnScoreText;
         }
     }

@@ -23,8 +23,20 @@ public class PlayerStatDisplay : MonoBehaviour
     private void Start()
     {
         Player player = Player.Instance;
+        if (player == null)
+        {
+            Debug.LogWarning("[PlayerStatDisplay] Player instance not found. Disabling stats UI until player loads.");
+            enabled = false;
+            return;
+        }
         bombSpawner = player.GetComponentInChildren<BombSpawner>();
         moveComponent = player.GetComponent<MoveComponent>();
+        if (bombSpawner == null || moveComponent == null)
+        {
+            Debug.LogWarning("[PlayerStatDisplay] Missing BombSpawner or MoveComponent on player. Disabling stats UI.");
+            enabled = false;
+            return;
+        }
         bombSpawner.OnBombLimitChanged += UpdateBombLimitText;
         bombSpawner.OnDamageChanged += UpdateDamageText;
         bombSpawner.OnLengthChanged += UpdateLengthText;
@@ -65,9 +77,15 @@ public class PlayerStatDisplay : MonoBehaviour
 
     private void OnDestroy()
     {
-        bombSpawner.OnBombLimitChanged -= UpdateBombLimitText;
-        bombSpawner.OnDamageChanged -= UpdateDamageText;
-        bombSpawner.OnLengthChanged -= UpdateLengthText;
-        moveComponent.OnMoveSpeedChanged -= UpdateMoveSpeedText;
+        if (bombSpawner != null)
+        {
+            bombSpawner.OnBombLimitChanged -= UpdateBombLimitText;
+            bombSpawner.OnDamageChanged -= UpdateDamageText;
+            bombSpawner.OnLengthChanged -= UpdateLengthText;
+        }
+        if (moveComponent != null)
+        {
+            moveComponent.OnMoveSpeedChanged -= UpdateMoveSpeedText;
+        }
     }
 }

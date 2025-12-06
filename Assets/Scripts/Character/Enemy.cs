@@ -9,7 +9,7 @@ using UnityEngine;
 /// Razón: Violación SRP (muerte + score), acoplamiento fuerte, falta de configurabilidad
 /// </summary>
 [System.Obsolete("Use CharacterSystemComposer with CharacterController instead - Refactored with Component Pattern", false)]
-[RequireComponent(typeof(Health))]
+[RequireComponent(typeof(global::Health))]
 public class Enemy : MonoBehaviour, ICharacter
 {
     [SerializeField] private int score = 5;
@@ -23,18 +23,19 @@ public class Enemy : MonoBehaviour, ICharacter
     private void Awake()
     {
         // [REMOVED] health = GetComponent<Health>(); - Migrated to CharacterSystemComposer
-        
-        // Obtener el sistema refactorizado
-        characterSystemComposer = CharacterSystemComposer.Instance;
     }
     
     private void Start()
     {
-        // FORZAR uso de CharacterSystemComposer
+        // Obtener el sistema refactorizado (en Start para garantizar inicialización)
+        characterSystemComposer = CharacterSystemComposer.Instance;
+        
+        // Si no existe, crearlo automáticamente
         if (characterSystemComposer == null)
         {
-            Debug.LogError("[Enemy] ❌ CharacterSystemComposer no encontrado! El juego requiere Clean Architecture.");
-            return;
+            Debug.LogWarning("[Enemy] CharacterSystemComposer no encontrado - Creando automáticamente...");
+            GameObject composerObj = new GameObject("CharacterSystemComposer");
+            characterSystemComposer = composerObj.AddComponent<CharacterSystemComposer>();
         }
         
         // Crear configuración personalizada con el score de este enemigo

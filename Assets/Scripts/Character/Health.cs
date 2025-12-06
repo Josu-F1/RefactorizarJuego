@@ -5,11 +5,11 @@ using System;
 using UnityEngine.Events;
 
 /// <summary>
-/// ❌ DEPRECATED: Esta clase viola principios SOLID y OCP.
-/// ✅ MIGRAR A: CharacterSystemComposer con Clean Architecture
-/// Esta clase ya NO debe usarse - el proyecto está 100% en Clean Architecture
+/// ⚠️ TRANSITIONAL: Esta clase está temporalmente habilitada para compatibilidad
+/// mientras migramos completamente a CharacterSystemComposer
+/// TODO: Migrar completamente y remover esta clase
 /// </summary>
-[System.Obsolete("❌ DEPRECATED: Use CharacterSystemComposer (Clean Architecture) instead. This legacy class is NO LONGER SUPPORTED.", true)]
+[System.Obsolete("⚠️ TRANSITIONAL: Use CharacterSystemComposer when possible. Legacy support enabled.", false)]
 public class Health : MonoBehaviour
 {
     public static Action<float, Health> OnAnyCharacterHealthChanged { get; set; }

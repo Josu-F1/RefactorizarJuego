@@ -99,7 +99,7 @@ public class FloatingTextEffect : PoolObject, IConfigurableEffect, IAttachableEf
         
         IsPlaying = false;
         Detach();
-        OnReturnToPoolInternal();
+        ResetVisualState();
         ReturnToPool();
     }
     
@@ -148,13 +148,19 @@ public class FloatingTextEffect : PoolObject, IConfigurableEffect, IAttachableEf
         Stop();
     }
     
-    private void OnReturnToPoolInternal()
+    protected override void OnPoolDeactivated()
     {
-        Stop();
+        base.OnPoolDeactivated();
+        IsPlaying = false;
+        ResetVisualState();
+    }
+
+    private void ResetVisualState()
+    {
         transform.localScale = Vector3.one;
         if (textMesh != null)
         {
-            textMesh.text = "";
+            textMesh.text = string.Empty;
             textMesh.color = Color.white;
         }
     }

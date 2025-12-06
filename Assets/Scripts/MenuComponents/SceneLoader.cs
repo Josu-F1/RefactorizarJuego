@@ -7,23 +7,35 @@ public class SceneLoader : MonoBehaviour
 {
     public static string levelKey = "Level";
 
+    private static void EnsureGameplayResumed()
+    {
+        if (Time.timeScale == 0f)
+        {
+            Time.timeScale = 1f;
+        }
+    }
+
     public static void Load(int sceneNumber)
     {
+        EnsureGameplayResumed();
         SceneManager.LoadScene(sceneNumber, LoadSceneMode.Single);
     }
 
     public static void Load(string sceneName)
     {
+        EnsureGameplayResumed();
         SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
     }
 
     public static void LoadCurrentScene()
     {
+        EnsureGameplayResumed();
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex, LoadSceneMode.Single);
     }
 
     public static void LoadSelectedScene()
     {
+        EnsureGameplayResumed();
         string sceneName = PlayerPrefs.GetString(levelKey, "MainMenu");
         if (Application.CanStreamedLevelBeLoaded(sceneName))
         {

@@ -23,6 +23,13 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
     protected override void Awake()
     {
         base.Awake();
+        
+        // Asegurar que este compositor persista entre escenas
+        if (Instance == this)
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+        
         InitializeCharacterSystem();
     }
     
@@ -43,7 +50,7 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
         // Inicializar cache
         activeControllers = new System.Collections.Generic.Dictionary<GameObject, ICharacterController>();
         
-        Debug.Log("[CharacterSystemComposer] Sistema de personajes inicializado con principios SOLID");
+        Debug.Log("[CharacterSystemComposer] ✅ Sistema de personajes inicializado con principios SOLID");
     }
     
     /// <summary>

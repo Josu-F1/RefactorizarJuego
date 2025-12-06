@@ -10,7 +10,7 @@ using UnityEngine.UI;
 public class HealthBar : MonoBehaviour
 {
     [Header("Optional - Auto GetComponentInParent")]
-    [SerializeField] private Health health;
+    [SerializeField] private global::Health health;
     private Image healthBar;
     private void Awake()
     {
@@ -24,7 +24,7 @@ public class HealthBar : MonoBehaviour
         }
 
         healthBar = GetComponent<Image>();
-        health = GetComponentInParent<Health>();
+        health = GetComponentInParent<global::Health>();
     }
     private void Start()
     {

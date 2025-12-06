@@ -9,7 +9,7 @@ using System;
 /// Razón: Violación SRP, lógica mezclada, falta de extensibilidad
 /// </summary>
 [System.Obsolete("Use CharacterSystemComposer with CharacterController instead - Refactored with Component Pattern", false)]
-[RequireComponent(typeof(Health))]
+[RequireComponent(typeof(global::Health))]
 public class Player : MonoBehaviourSingleton<Player>, ICharacter
 {
     public CharacterType CharacterType => CharacterType.Player;
@@ -23,18 +23,19 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
     {
         base.Awake();
         // [REMOVED] health = GetComponent<Health>(); - Migrated to CharacterSystemComposer
-        
-        // Obtener el sistema refactorizado
-        characterSystemComposer = CharacterSystemComposer.Instance;
     }
     
     private void Start()
     {
-        // FORZAR uso de CharacterSystemComposer
+        // Obtener el sistema refactorizado (en Start para garantizar inicialización)
+        characterSystemComposer = CharacterSystemComposer.Instance;
+        
+        // Si no existe, crearlo automáticamente
         if (characterSystemComposer == null)
         {
-            Debug.LogError("[Player] ❌ CharacterSystemComposer no encontrado! El juego requiere Clean Architecture.");
-            return;
+            Debug.LogWarning("[Player] CharacterSystemComposer no encontrado - Creando automáticamente...");
+            GameObject composerObj = new GameObject("CharacterSystemComposer");
+            characterSystemComposer = composerObj.AddComponent<CharacterSystemComposer>();
         }
         
         characterController = characterSystemComposer.CreateCharacterController(CharacterType.Player, gameObject);
@@ -48,7 +49,15 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
         }
         else
         {
-            Debug.LogError("[Player] ❌ No se pudo crear CharacterController");
+            Debug.LogWarning("[Player] ⚠️ No se pudo crear CharacterController - usando componente Health legacy como fallback");
+            
+            // Fallback a sistema legacy si falla
+            var healthComponent = GetComponent<global::Health>();
+            if (healthComponent != null)
+            {
+                healthComponent.OnDead += () => OnPlayerDead?.Invoke();
+                Debug.LogWarning("[Player] Usando Health component legacy (no recomendado)");
+            }
         }
     }
     

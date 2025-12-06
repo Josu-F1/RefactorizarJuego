@@ -20,6 +20,7 @@ namespace CleanArchitecture.Presentation.Presenters
 
         private IPlayerService playerService;
         private ICharacterController characterController;
+        private global::Health health; // transitional support
 
         private void Start()
         {
@@ -39,7 +40,7 @@ namespace CleanArchitecture.Presentation.Presenters
             if (characterController != null)
             {
                 SubscribeToHealthEvents();
-                UpdateHealthBar(0);
+                UpdateHealthBarFromHealth();
             }
             else
             {
@@ -57,6 +58,8 @@ namespace CleanArchitecture.Presentation.Presenters
                 if (player != null)
                 {
                     characterController = characterSystem.GetController(player.gameObject);
+                    // Obtener Health legacy para compatibilidad inmediata
+                    health = player.GetComponent<global::Health>();
                 }
             }
             
@@ -70,16 +73,19 @@ namespace CleanArchitecture.Presentation.Presenters
         {
             // Actualizar periódicamente (TODO: usar EventBus cuando esté disponible)
             InvokeRepeating(nameof(UpdateHealthBarPeriodic), 0f, 0.1f);
+
+            // Suscripción directa a Health legacy si está disponible
+            if (health != null)
+            {
+                health.OnHealthChanged += OnHealthChanged;
+            }
         }
 
         private void UpdateHealthBarPeriodic()
         {
             // TODO: Implementar con EventBus (CharacterDamagedEvent, CharacterHealedEvent)
-            // Por ahora, mantener fillAmount estático
-            if (healthBarImage != null && characterController != null)
-            {
-                // healthBarImage.fillAmount se actualizará desde EventBus
-            }
+            // Por ahora, usar Health legacy para reflejar porcentaje
+            UpdateHealthBarFromHealth();
         }
 
         private void UpdateHealthBar(float percentage)
@@ -88,9 +94,22 @@ namespace CleanArchitecture.Presentation.Presenters
             healthBarImage.fillAmount = percentage;
         }
 
+        private void UpdateHealthBarFromHealth()
+        {
+            if (healthBarImage != null && health != null)
+            {
+                healthBarImage.fillAmount = health.Percentage;
+            }
+        }
+
         private void OnDestroy()
         {
             CancelInvoke(nameof(UpdateHealthBarPeriodic));
+
+            if (health != null)
+            {
+                health.OnHealthChanged -= OnHealthChanged;
+            }
         }
 
         /// <summary>
@@ -103,6 +122,11 @@ namespace CleanArchitecture.Presentation.Presenters
             {
                 SubscribeToHealthEvents();
             }
+        }
+
+        private void OnHealthChanged(float delta)
+        {
+            UpdateHealthBarFromHealth();
         }
     }
 }
