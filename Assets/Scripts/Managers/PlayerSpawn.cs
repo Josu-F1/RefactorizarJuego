@@ -1,5 +1,6 @@
 #pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
+using System.Collections;
 
 /// <summary>
 /// Establece la posición inicial del jugador y puede resetear su posición guardada
@@ -11,31 +12,43 @@ public class PlayerSpawn : MonoBehaviour
     [SerializeField] private bool clearSavedPosition = true;
     [SerializeField] private string playerPositionSaverId = "Player"; // ID del PositionSaver del jugador
     
+    private Coroutine spawnRoutine;
+
     private void Start()
     {
-        SetPlayerSpawnPosition();
+        spawnRoutine = StartCoroutine(WaitForPlayerAndSpawn());
     }
-    
-    private void SetPlayerSpawnPosition()
+
+    private IEnumerator WaitForPlayerAndSpawn()
     {
-        // Si queremos usar la posición actual del objeto como spawn
         if (useCurrentPositionAsSpawn)
         {
             spawnPosition = transform.position;
         }
-        
-        // Buscar al jugador y establecer su posición
-        if (Player.Instance != null)
+
+        while (Player.Instance == null)
         {
-            Player.Instance.transform.position = spawnPosition;
-            
-            // Si queremos limpiar la posición guardada
-            if (clearSavedPosition && !string.IsNullOrEmpty(playerPositionSaverId))
-            {
-                PlayerPrefs.DeleteKey(playerPositionSaverId + "X");
-                PlayerPrefs.DeleteKey(playerPositionSaverId + "Y");
-                PlayerPrefs.Save();
-            }
+            yield return null;
+        }
+
+        ApplySpawnPosition();
+    }
+
+    private void ApplySpawnPosition()
+    {
+        var player = Player.Instance;
+        if (player == null)
+        {
+            return;
+        }
+
+        player.transform.position = spawnPosition;
+
+        if (clearSavedPosition && !string.IsNullOrEmpty(playerPositionSaverId))
+        {
+            PlayerPrefs.DeleteKey(playerPositionSaverId + "X");
+            PlayerPrefs.DeleteKey(playerPositionSaverId + "Y");
+            PlayerPrefs.Save();
         }
     }
     
@@ -43,7 +56,7 @@ public class PlayerSpawn : MonoBehaviour
     public void SetSpawnPosition(Vector3 newPosition)
     {
         spawnPosition = newPosition;
-        SetPlayerSpawnPosition();
+        ApplySpawnPosition();
     }
     
     // Método para visualizar la posición de spawn en el editor
