@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     public Action OnScoreUpdated { get; set; }
     private int currentScore = 0;
     private bool isPlaying = true;
+    private Player subscribedPlayer;
 
     private void Start()
     {
@@ -33,9 +34,11 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         // ✅ Conectar el evento de muerte del jugador
         Enemy.OnAnyEnemyKilled += IncreaseScore;
         
-        if (Player.Instance != null)
+        var player = Player.Instance;
+        if (player != null)
         {
-            Player.Instance.OnPlayerDead += Defeat;
+            subscribedPlayer = player;
+            subscribedPlayer.OnPlayerDead += Defeat;
             Debug.Log("[GameManager] ✅ Conectado a eventos de Player (muerte) y Enemy (score)");
         }
         else
@@ -123,9 +126,10 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         // Cleanup de eventos
         Enemy.OnAnyEnemyKilled -= IncreaseScore;
         
-        if (Player.Instance != null)
+        if (subscribedPlayer != null)
         {
-            Player.Instance.OnPlayerDead -= Defeat;
+            subscribedPlayer.OnPlayerDead -= Defeat;
+            subscribedPlayer = null;
         }
     }
 }
