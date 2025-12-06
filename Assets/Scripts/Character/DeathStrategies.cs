@@ -45,19 +45,18 @@ public class DeactivateDeathStrategy : IDeathStrategy
 [System.Serializable]
 public class EnemyDeathStrategy : IDeathStrategy
 {
-    [SerializeField] private int scoreValue = 5;
-    
-    public EnemyDeathStrategy(int score = 5)
-    {
-        scoreValue = score;
-    }
-    
     public void OnDeath(GameObject character)
     {
         // Notificar puntuación si es un enemigo
         Enemy enemy = character.GetComponent<Enemy>();
         if (enemy != null)
         {
+            // Usar el score directamente del Enemy a través de reflexión o serialización
+            // Como Enemy tiene [SerializeField] private int score, necesitamos obtenerlo
+            var scoreField = typeof(Enemy).GetField("score", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            int scoreValue = scoreField != null ? (int)scoreField.GetValue(enemy) : 5;
+            
+            Debug.Log($"[EnemyDeathStrategy] Enemigo {enemy.name} murió. Score otorgado: {scoreValue}");
             Enemy.OnAnyEnemyKilled?.Invoke(scoreValue);
         }
         

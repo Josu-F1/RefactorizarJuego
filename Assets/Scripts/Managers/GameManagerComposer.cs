@@ -8,6 +8,7 @@ using UnityEngine.SceneManagement;
 /// Principio: Dependency Inversion Principle (DIP) - Depende de interfaces
 /// Patrón: Facade Pattern - Simplifica el acceso a múltiples subsistemas
 /// </summary>
+[System.Obsolete("GameManagerComposer is deprecated. Use IGameStateService and IScoreService from ServiceLocator instead.")]
 public class GameManagerComposer : MonoBehaviourSingleton<GameManagerComposer>
 {
     [Header("Configuration")]

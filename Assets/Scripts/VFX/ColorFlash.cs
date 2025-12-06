@@ -40,7 +40,7 @@ public class ColorFlash : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("[ColorFlash] OBSOLETO: Usando implementación legacy. Migrar a ColorFlashEffect.");
+            // Sistema legacy (silenciado hasta completar migración)
         }
     }
     

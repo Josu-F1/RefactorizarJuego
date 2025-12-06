@@ -45,8 +45,7 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
         }
         else
         {
-            // Sistema legacy
-            Debug.LogWarning("[Player] OBSOLETO: Usando implementación legacy. Migrar a CharacterSystemComposer.");
+            // Sistema legacy (silenciado hasta completar migración)
             health.OnDead += Die;
         }
     }

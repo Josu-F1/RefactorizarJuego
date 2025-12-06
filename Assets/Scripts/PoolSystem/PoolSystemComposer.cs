@@ -15,6 +15,7 @@ namespace PoolSystem
     /// Patrón: Facade Pattern + Composite Pattern
     /// Principio: Single Responsibility Principle (SRP) - Orquestación del sistema
     /// </summary>
+    [System.Obsolete("PoolSystemComposer is deprecated. Use IPoolService from ServiceLocator instead.")]
     public class PoolSystemComposer : MonoBehaviour
     {
         [Header("Pool System Configuration")]
@@ -278,10 +279,12 @@ namespace PoolSystem
                 return;
             }
             
-            // Fallback al sistema legacy
-            if (poolable is MonoBehaviour mb && PoolManager.Instance != null)
+            // CRITICAL FIX: No llamar a PoolManager.Instance para evitar ciclo infinito
+            // Si no hay instancia, simplemente desactivar el objeto
+            if (poolable is MonoBehaviour mb)
             {
-                PoolManager.Instance.ReturnToPool(poolable.Type, mb.gameObject);
+                mb.gameObject.SetActive(false);
+                Debug.LogWarning($"[PoolSystemComposer] No instance available. Object deactivated: {mb.name}");
             }
         }
 

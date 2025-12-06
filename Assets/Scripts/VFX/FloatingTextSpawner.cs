@@ -38,8 +38,7 @@ public class FloatingTextSpawner : MonoBehaviour
         }
         else
         {
-            // Fallback al sistema legacy
-            Debug.LogWarning("[FloatingTextSpawner] OBSOLETO: Usando implementación legacy. Migrar a VFXSystemComposer.");
+            // Fallback al sistema legacy (silenciado hasta completar migración)
             InitializeLegacySystem();
         }
     }

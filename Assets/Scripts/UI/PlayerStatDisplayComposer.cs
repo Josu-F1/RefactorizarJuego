@@ -6,6 +6,7 @@ using UnityEngine;
 /// Principio: Dependency Inversion Principle (DIP) - Depende de interfaces
 /// Patrón: Composite Pattern - Compone diferentes UI elements
 /// </summary>
+[System.Obsolete("Use individual Presenters (HealthBarPresenter, ScoreBarPresenter, BombStatsPresenter) instead")]
 public class PlayerStatDisplayComposer : MonoBehaviour
 {
     [Header("UI Components")]

@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System.Collections.Generic;
 using ShootingSystem.Interfaces;

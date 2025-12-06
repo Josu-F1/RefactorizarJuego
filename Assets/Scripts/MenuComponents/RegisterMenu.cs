@@ -18,7 +18,7 @@ public class RegisterMenu : MonoBehaviour
 
     public void Start()
     {
-        Debug.LogWarning("[OBSOLETE] RegisterMenu is deprecated. Use MenuSystemComposer instead.");
+        // Silenciado: Sistema legacy en uso hasta completar migración
 
         usernameInput.onValueChanged.AddListener(OnChangeInput);
         passwordInput.onValueChanged.AddListener(OnChangeInput);

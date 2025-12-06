@@ -34,6 +34,8 @@ public class Health : MonoBehaviour
     }
     public void TakeDamage(float damage)
     {
+        if (isDead) return; // No recibir daño si ya está muerto
+        
         currentHP -= damage;
         ClampHP();
         OnHealthChanged?.Invoke(-damage);
@@ -59,5 +61,5 @@ public class Health : MonoBehaviour
     }
     public float Percentage => currentHP / maxHP;
     public bool IsFull => currentHP == maxHP;
-    public bool IsDead => currentHP == 0;
+    public bool IsDead => isDead; // Usar el flag en vez de comparación con 0
 }

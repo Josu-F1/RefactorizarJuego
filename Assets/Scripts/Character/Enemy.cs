@@ -55,8 +55,7 @@ public class Enemy : MonoBehaviour, ICharacter
         }
         else
         {
-            // Sistema legacy
-            Debug.LogWarning("[Enemy] OBSOLETO: Usando implementación legacy. Migrar a CharacterSystemComposer.");
+            // Sistema legacy (silenciado hasta completar migración)
             health.OnDead += Die;
         }
     }

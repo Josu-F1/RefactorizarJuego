@@ -15,10 +15,11 @@ public class ObjectPool
 
     public GameObject Get(Vector3 position, Quaternion quaternion)
     {
-        // Usar nuevo sistema si está disponible
-        if (PoolSystemComposer.Instance != null)
+        // Prioridad 1: Clean Architecture
+        var legacyAdapter = CleanArchitecture.Presentation.Adapters.LegacyPoolAdapter.Instance;
+        if (legacyAdapter != null)
         {
-            GameObject g = PoolSystemComposer.PoolManagerCompat.Get(type, position, quaternion);
+            GameObject g = legacyAdapter.Get(type, position, quaternion);
             if (g != null)
             {
                 var sr = g.GetComponentInChildren<SpriteRenderer>();
@@ -28,7 +29,7 @@ public class ObjectPool
         }
         
         // Fallback al sistema legacy
-        GameObject legacyObj = PoolManager.Instance.Get(type, position, quaternion);
+        GameObject legacyObj = PoolManager.Instance?.Get(type, position, quaternion);
         var legacySr = legacyObj?.GetComponentInChildren<SpriteRenderer>();
         if (legacySr != null) legacySr.color = color;
         return legacyObj;

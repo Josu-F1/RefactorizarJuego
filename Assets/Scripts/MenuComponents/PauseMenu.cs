@@ -12,7 +12,7 @@ public class PauseMenu : MonoBehaviour
     
     private void Start()
     {
-        Debug.LogWarning("[OBSOLETE] PauseMenu is deprecated. Use MenuSystemComposer instead.");
+        // Silenciado: Sistema legacy en uso hasta completar migración
         Resume();
     }
     public void HandlePause()

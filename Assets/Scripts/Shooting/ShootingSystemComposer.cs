@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System.Collections.Generic;
 using ShootingSystem.Interfaces;
@@ -122,6 +123,7 @@ namespace ShootingSystem
     }
 
     // ============= MAIN SHOOTING SYSTEM COMPOSER =============
+    [System.Obsolete("ShootingSystemComposer is deprecated. Use IShootingService from ServiceLocator instead.")]
     public class ShootingSystemComposer : MonoBehaviour, IShootingSystemComposer
     {
         [Header("System Configuration")]

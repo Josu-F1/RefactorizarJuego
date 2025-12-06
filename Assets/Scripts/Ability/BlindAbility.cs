@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 
 public class BlindAbility : MonoBehaviour

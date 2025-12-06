@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Legacy HealthBar - Use HealthBarPresenter from Clean Architecture instead
+/// </summary>
+[System.Obsolete("Use HealthBarPresenter from CleanArchitecture.Presentation.Presenters instead")]
 public class HealthBar : MonoBehaviour
 {
     [Header("Optional - Auto GetComponentInParent")]
@@ -10,11 +14,21 @@ public class HealthBar : MonoBehaviour
     private Image healthBar;
     private void Awake()
     {
+        // Check if HealthBarPresenter exists
+        var presenter = GetComponent<CleanArchitecture.Presentation.Presenters.HealthBarPresenter>();
+        if (presenter != null)
+        {
+            // Clean Architecture presenter exists, disable this legacy component
+            enabled = false;
+            return;
+        }
+
         healthBar = GetComponent<Image>();
         health = GetComponentInParent<Health>();
     }
     private void Start()
     {
+        if (!enabled) return;
         health.OnHealthChanged += UpdateHealthBar;
         UpdateHealthBar(0);
     }
@@ -25,6 +39,7 @@ public class HealthBar : MonoBehaviour
     }
     private void OnDestroy()
     {
-        health.OnHealthChanged -= UpdateHealthBar;
+        if (health != null)
+            health.OnHealthChanged -= UpdateHealthBar;
     }
 }

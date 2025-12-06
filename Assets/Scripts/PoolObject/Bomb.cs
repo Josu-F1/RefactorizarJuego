@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -94,9 +95,26 @@ public class Bomb : PoolObject
     }
     private Explosion GetExplosion(Vector3 position)
     {
-        Explosion e = ExplosionPool.Get(position).GetComponent<Explosion>();
-        e.CharacterType = CharacterType;
-        e.Damage = Damage;
+        // CRITICAL FIX: Null check para ExplosionPool
+        if (ExplosionPool == null)
+        {
+            Debug.LogError("[Bomb] ExplosionPool is null! Cannot spawn explosion.");
+            return null;
+        }
+        
+        GameObject explosionObj = ExplosionPool.Get(position);
+        if (explosionObj == null)
+        {
+            Debug.LogError("[Bomb] ExplosionPool.Get() returned null!");
+            return null;
+        }
+        
+        Explosion e = explosionObj.GetComponent<Explosion>();
+        if (e != null)
+        {
+            e.CharacterType = CharacterType;
+            e.Damage = Damage;
+        }
         return e;
     }
     private void DestroyBomb()

@@ -29,15 +29,24 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         // Asegurar que el juego esté en estado normal al inicio
         Time.timeScale = 1f;
         
+        // ✅ Conectar el evento de muerte del jugador
         Enemy.OnAnyEnemyKilled += IncreaseScore;
         
-        // Asegurar que el Player existe antes de suscribirse
         if (Player.Instance != null)
         {
             Player.Instance.OnPlayerDead += Defeat;
+            Debug.Log("[GameManager] ✅ Conectado a eventos de Player (muerte) y Enemy (score)");
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] ⚠️ Player.Instance es NULL! No se puede conectar evento de muerte");
         }
     }
 
+    /// <summary>
+    /// OBSOLETO: Ahora lo maneja ScoreService
+    /// </summary>
+    [System.Obsolete("Use ScoreService.AddScore instead")]
     private void IncreaseScore(int score)
     {
         if (!isPlaying)
@@ -84,6 +93,10 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         Debug.Log($"[GameManager] Verificación final - Nivel del jugador: {newLevel}");
     }
 
+    /// <summary>
+    /// OBSOLETO: Ahora lo maneja GameStateService
+    /// </summary>
+    [System.Obsolete("Use GameStateService.TriggerDefeat instead")]
     private void Defeat()
     {
         if (!isPlaying)
@@ -106,6 +119,12 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
     private void OnDestroy()
     {
+        // Cleanup de eventos
         Enemy.OnAnyEnemyKilled -= IncreaseScore;
+        
+        if (Player.Instance != null)
+        {
+            Player.Instance.OnPlayerDead -= Defeat;
+        }
     }
 }
