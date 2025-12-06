@@ -21,7 +21,7 @@ public class EditorSecuritySettings
         // Configurar la última verificación para evitar nuevos intentos
         EditorPrefs.SetString("AstarLastUpdateCheck", System.DateTime.UtcNow.AddYears(1).ToString(System.Globalization.CultureInfo.InvariantCulture));
         
-        Debug.Log("EditorSecuritySettings: Configuración aplicada para evitar conexiones inseguras.");
+        // Debug.Log("EditorSecuritySettings: Configuración aplicada para evitar conexiones inseguras.");
     }
     
     [MenuItem("Tools/Security/Disable Insecure Connections")]

@@ -1,11 +1,12 @@
+#pragma warning disable CS0618 // El tipo o miembro está obsoleto
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// ❌ DEPRECATED: Use PickupSystemComposer with DamagePickupEffect instead
+/// ⚠️ TRANSITIONAL: Use PickupSystemComposer with DamagePickupEffect instead
 /// </summary>
-[System.Obsolete("❌ DEPRECATED: Use PickupSystemComposer (Clean Architecture) instead. This legacy class is NO LONGER SUPPORTED.", true)]
+[System.Obsolete("⚠️ TRANSITIONAL: Use PickupSystemComposer when possible. Legacy support enabled.", false)]
 public class DamagePickup : MonoBehaviour, IPickup
 {
     [SerializeField] private float damage = 5;

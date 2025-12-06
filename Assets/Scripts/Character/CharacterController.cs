@@ -60,7 +60,7 @@ public class CharacterController : ICharacterController
             deathHandler.OnDeath += () => GetComponent<IScoreProvider>()?.AwardScore();
         }
         
-        Debug.Log($"[CharacterController] Initialized {CharacterType} with {components.Count} components");
+        // Debug.Log($"[CharacterController] Initialized {CharacterType} with {components.Count} components");
     }
     
     public T GetComponent<T>() where T : class, ICharacterComponent
@@ -74,12 +74,12 @@ public class CharacterController : ICharacterController
         components[typeof(T)] = component;
         component.Initialize(this);
         
-        Debug.Log($"[CharacterController] Registered component: {typeof(T).Name}");
+        // Debug.Log($"[CharacterController] Registered component: {typeof(T).Name}");
     }
     
     public void NotifyEvent(CharacterEvent eventType, object data = null)
     {
-        Debug.Log($"[CharacterController] Event: {eventType} for {CharacterType}");
+        // Debug.Log($"[CharacterController] Event: {eventType} for {CharacterType}");
         
         // Notificar eventos globales si está habilitado
         if (config.notifyGlobalEvents)

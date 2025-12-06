@@ -287,8 +287,9 @@ public class GameManagerComposer : MonoBehaviourSingleton<GameManagerComposer>
         HandleVictoryComplete();
     }
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         // Cleanup de eventos
         Enemy.OnAnyEnemyKilled -= HandleEnemyKilled;
         

@@ -109,8 +109,9 @@ public class PickupSystemComposer : MonoBehaviourSingleton<PickupSystemComposer>
     /// </summary>
     // [REMOVED] MigrateLegacyPickups - Legacy pickups deprecados, usar ModernPickupFactory en su lugar
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         // Limpiar todos los efectos activos
         foreach (var effect in activePickups)
         {

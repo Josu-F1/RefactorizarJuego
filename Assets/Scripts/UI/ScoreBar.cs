@@ -31,12 +31,19 @@ public class ScoreBar : MonoBehaviour
     
     private void Start()
     {
-        if (!enabled) return;
+        if (!enabled)
+        {
+            Debug.LogWarning("[ScoreBar] ❌ Componente deshabilitado!");
+            return;
+        }
+
+        Debug.LogWarning("[ScoreBar] ⚡ Inicializando...");
 
         // Try Clean Architecture first (silencioso si no está disponible)
         scoreService = ServiceLocator.Instance.GetSilent<IScoreService>();
         if (scoreService != null)
         {
+            Debug.LogWarning("[ScoreBar] ✅ Usando ScoreService");
             scoreService.OnScoreChanged += OnScoreChanged;
             UpdateScoreBar();
         }
@@ -46,6 +53,7 @@ public class ScoreBar : MonoBehaviour
             gameManager = GameManager.Instance;
             if (gameManager != null)
             {
+                Debug.LogWarning("[ScoreBar] ✅ Usando GameManager - Suscrito a OnScoreUpdated");
                 gameManager.OnScoreUpdated += UpdateScoreBar;
                 UpdateScoreBar();
             }
@@ -59,13 +67,24 @@ public class ScoreBar : MonoBehaviour
     
     private void UpdateScoreBar()
     {
+        if (scoreBar == null)
+        {
+            Debug.LogError("[ScoreBar] ❌ scoreBar Image es NULL!");
+            return;
+        }
+
         if (scoreService != null)
         {
             scoreBar.fillAmount = scoreService.Progress;
         }
         else if (gameManager != null)
         {
-            scoreBar.fillAmount = gameManager.Progress;
+            // Usar progreso de enemigos en lugar de score
+            scoreBar.fillAmount = gameManager.EnemyProgress;
+        }
+        else
+        {
+            Debug.LogError("[ScoreBar] ❌ No hay GameManager ni ScoreService!");
         }
     }
     

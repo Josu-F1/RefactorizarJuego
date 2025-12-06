@@ -31,7 +31,7 @@ public abstract class MonoBehaviourSingleton<T> : MonoBehaviour where T : MonoBe
                 Debug.LogWarning($"[MonoBehaviourSingleton] No se encontró instancia de {typeof(T).Name}, creando una nueva automáticamente");
                 GameObject singletonObj = new GameObject($"[{typeof(T).Name}]");
                 instance = singletonObj.AddComponent<T>();
-                DontDestroyOnLoad(singletonObj);
+                // No usar DontDestroyOnLoad automáticamente - cada clase decide si lo necesita
             }
             
             return instance;

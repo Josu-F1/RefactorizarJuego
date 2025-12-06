@@ -19,10 +19,13 @@ namespace CleanArchitecture.Presentation.Presenters
 
         [Header("Configuration")]
         [SerializeField] private bool showProgress = true;
+        [SerializeField] private bool showEnemyCount = true;
         [SerializeField] private string scoreFormat = "Score: {0}";
         [SerializeField] private string goalFormat = "Goal: {0}";
+        [SerializeField] private string enemyFormat = "Enemigos: {0}/{1}";
 
         private IScoreService scoreService;
+        private GameManager gameManager;
 
         private void Start()
         {
@@ -33,15 +36,18 @@ namespace CleanArchitecture.Presentation.Presenters
         {
             // Obtener ScoreService del ServiceLocator
             scoreService = ServiceLocator.Instance.Get<IScoreService>();
+            
+            // Obtener GameManager para conteo de enemigos
+            gameManager = GameManager.Instance;
 
-            if (scoreService != null)
+            if (scoreService != null || gameManager != null)
             {
                 SubscribeToEvents();
                 UpdateUI();
             }
             else
             {
-                Debug.LogError("[ScoreBarPresenter] ScoreService no encontrado en ServiceLocator");
+                Debug.LogError("[ScoreBarPresenter] ScoreService y GameManager no encontrados");
             }
         }
 
@@ -49,19 +55,79 @@ namespace CleanArchitecture.Presentation.Presenters
         {
             if (scoreService != null)
             {
-                scoreService.OnScoreChanged += OnScoreChanged;
+                scoreService.OnScoreChanged += OnScoreChangedFromService;
+            }
+            
+            if (gameManager != null)
+            {
+                gameManager.OnScoreUpdated += OnScoreChangedFromGameManager;
             }
         }
-
-        private void OnScoreChanged(int newScore)
+        
+        private void OnScoreChangedFromService(int newScore)
         {
             UpdateUI();
         }
-
+        
+        private void OnScoreChangedFromGameManager()
+        {
+            UpdateUI();
+        }
+        
         private void UpdateUI()
         {
-            if (scoreService == null) return;
+            // Priorizar GameManager si está disponible
+            if (gameManager != null)
+            {
+                UpdateUIFromGameManager();
+            }
+            else if (scoreService != null)
+            {
+                UpdateUIFromScoreService();
+            }
+        }
+        
+        private void UpdateUIFromGameManager()
+        {
+            // Actualizar barra de progreso basada en enemigos muertos
+            if (scoreBarImage != null && showProgress)
+            {
+                float progress = gameManager.EnemyProgress;
+                scoreBarImage.fillAmount = progress;
+                Debug.LogWarning($"[ScoreBarPresenter] 📊 PROGRESO ACTUALIZADO: {progress:P0} ({gameManager.EnemiesKilled}/{gameManager.TotalEnemies})");
+            }
 
+            // Mostrar conteo de enemigos si está habilitado
+            if (scoreText != null)
+            {
+                if (showEnemyCount)
+                {
+                    scoreText.text = string.Format(enemyFormat, 
+                        gameManager.EnemiesKilled, 
+                        gameManager.TotalEnemies);
+                }
+                else
+                {
+                    scoreText.text = string.Format(scoreFormat, gameManager.CurrentScore);
+                }
+            }
+
+            // Actualizar texto de objetivo
+            if (goalText != null)
+            {
+                if (showEnemyCount)
+                {
+                    goalText.text = $"Meta: {gameManager.TotalEnemies} enemigos";
+                }
+                else
+                {
+                    goalText.text = string.Format(goalFormat, gameManager.RequiredScore);
+                }
+            }
+        }
+        
+        private void UpdateUIFromScoreService()
+        {
             // Actualizar barra de progreso
             if (scoreBarImage != null && showProgress)
             {
@@ -85,7 +151,12 @@ namespace CleanArchitecture.Presentation.Presenters
         {
             if (scoreService != null)
             {
-                scoreService.OnScoreChanged -= OnScoreChanged;
+                scoreService.OnScoreChanged -= OnScoreChangedFromService;
+            }
+            
+            if (gameManager != null)
+            {
+                gameManager.OnScoreUpdated -= OnScoreChangedFromGameManager;
             }
         }
 

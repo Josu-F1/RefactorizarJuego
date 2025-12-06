@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // El tipo o miembro está obsoleto
 using System;
 using UnityEngine;
 
@@ -55,12 +56,87 @@ public class Enemy : MonoBehaviour, ICharacter
             // Crear controller con configuración personalizada
             var factory = new CharacterControllerFactory();
             characterController = factory.CreateCharacterController(CharacterType.Enemy, gameObject, customConfig);
-            Debug.Log("[Enemy] ✅ Usando CharacterSystemComposer (Clean Architecture)");
+            // Debug.Log("[Enemy] ✅ Usando CharacterSystemComposer (Clean Architecture)");
         }
+    }
+    
+    private bool isDying = false;
+    
+    private void Die()
+    {
+        // Prevenir múltiples llamadas
+        if (isDying) return;
+        isDying = true;
+        
+        // Solo spawner pickups si el juego está corriendo (no al cambiar escenas)
+        if (Application.isPlaying && gameObject.scene.isLoaded)
+        {
+            // Spawn pickup aleatorio con 30% de probabilidad
+            if (UnityEngine.Random.value <= 0.3f)
+            {
+                SpawnRandomPickup();
+            }
+            
+            // Notificar score
+            OnAnyEnemyKilled?.Invoke(score);
+        }
+    }
+    
+    private void SpawnRandomPickup()
+    {
+        // Seleccionar pickup aleatorio
+        PickupType[] availablePickups = new PickupType[] 
+        {
+            PickupType.Health,
+            PickupType.Speed,
+            PickupType.BombLimit,
+            PickupType.BombLength,
+            PickupType.Damage
+        };
+        
+        PickupType randomPickup = availablePickups[UnityEngine.Random.Range(0, availablePickups.Length)];
+        string prefabPath = $"Assets/Prefabs/Pickups/{GetPickupPrefabName(randomPickup)}.prefab";
+        
+        // Cargar prefab usando Resources (requiere mover prefabs a Resources) o usar AssetDatabase en editor
+        #if UNITY_EDITOR
+        GameObject prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+        if (prefab != null)
+        {
+            Instantiate(prefab, transform.position, Quaternion.identity);
+            Debug.Log($"[Enemy] Pickup '{randomPickup}' spawned at {transform.position}");
+        }
+        else
+        {
+            Debug.LogWarning($"[Enemy] No se encontr\u00f3 prefab en: {prefabPath}");
+        }
+        #else
+        // En runtime, usar Resources
+        GameObject prefab = Resources.Load<GameObject>($"Pickups/{GetPickupPrefabName(randomPickup)}");
+        if (prefab != null)
+        {
+            Instantiate(prefab, transform.position, Quaternion.identity);
+        }
+        #endif
+    }
+    
+    private string GetPickupPrefabName(PickupType pickupType)
+    {
+        return pickupType switch
+        {
+            PickupType.Health => "HealthPickup",
+            PickupType.Speed => "SpeedPickup",
+            PickupType.BombLimit => "BombLimitPickup",
+            PickupType.BombLength => "BombLengthPickup",
+            PickupType.Damage => "DamagePickup",
+            _ => "HealthPickup"
+        };
     }
     
     private void OnDestroy()
     {
+        // Ejecutar lógica de muerte antes de destruir
+        Die();
+        
         // Limpiar CharacterSystemComposer
         if (characterSystemComposer != null && gameObject != null)
         {

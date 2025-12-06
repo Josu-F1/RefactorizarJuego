@@ -36,7 +36,7 @@ public class ColorFlash : MonoBehaviour
             {
                 modernEffect = gameObject.AddComponent<ColorFlashEffect>();
             }
-            Debug.Log("[ColorFlash] Migrado automáticamente a ColorFlashEffect (SOLID refactorizado)");
+            // Debug.Log("[ColorFlash] Migrado automáticamente a ColorFlashEffect (SOLID refactorizado)");
         }
         else
         {

@@ -69,8 +69,16 @@ public class AudioManager : MonoBehaviourSingleton<AudioManager>
     
     private void InitializeLegacyAudio()
     {
+        if (audios == null || audios.Length == 0)
+        {
+            Debug.LogWarning("[AudioManager] No hay audios configurados");
+            return;
+        }
+        
         foreach (var audio in audios)
         {
+            if (audio == null || audio.Clip == null) continue;
+            
             AudioSource audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.clip = audio.Clip;
             audioSource.volume = audio.Volume;

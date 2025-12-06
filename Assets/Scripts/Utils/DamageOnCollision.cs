@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // El tipo o miembro está obsoleto
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,19 +14,23 @@ public class DamageOnCollision : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D other)
     {
-        // Usar CharacterSystemComposer
+        // Aplicar daño directo usando sistema legacy Health
+        Health health = other.gameObject.GetComponent<Health>();
+        if (health == null) return;
+        
+        ICharacter hitCharacter = health.GetComponent<ICharacter>();
+        if (hitCharacter.CharacterType == characterType) return;
+        
+        health.TakeDamage(damage);
+        
+        // Notificar evento si está registrado en CharacterSystemComposer
         var characterSystem = CharacterSystemComposer.Instance;
-        if (characterSystem == null) return;
+        var controller = characterSystem?.GetController(other.gameObject);
+        controller?.NotifyEvent(CharacterEvent.HealthDepleted, damage);
         
-        var controller = characterSystem.GetController(other.gameObject);
-        if (controller == null || controller.CharacterType == characterType) return;
-        
-        controller.NotifyEvent(CharacterEvent.HealthDepleted, damage);
-        
-        if (shouldDieAfterCollision)
+        if (shouldDieAfterCollision) 
         {
-            var selfController = characterSystem.GetController(gameObject);
-            selfController?.NotifyEvent(CharacterEvent.Death);
+            GetComponent<Health>()?.Die();
         }
     }
 }

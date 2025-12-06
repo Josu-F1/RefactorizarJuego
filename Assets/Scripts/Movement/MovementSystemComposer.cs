@@ -156,8 +156,9 @@ public class MovementSystemComposer : MonoBehaviourSingleton<MovementSystemCompo
             Debug.Log("[MovementSystemComposer] Todos los controllers limpiados");
     }
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         CleanupAll();
     }
 }

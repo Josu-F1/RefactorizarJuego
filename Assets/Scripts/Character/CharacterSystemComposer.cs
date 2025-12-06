@@ -50,7 +50,7 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
         // Inicializar cache
         activeControllers = new System.Collections.Generic.Dictionary<GameObject, ICharacterController>();
         
-        Debug.Log("[CharacterSystemComposer] ✅ Sistema de personajes inicializado con principios SOLID");
+        // Debug.Log("[CharacterSystemComposer] ✅ Sistema de personajes inicializado con principios SOLID");
     }
     
     /// <summary>
@@ -164,8 +164,9 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
     /// <summary>
     /// Cleanup cuando se destruye el objeto
     /// </summary>
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (activeControllers != null)
         {
             foreach (var kvp in activeControllers)

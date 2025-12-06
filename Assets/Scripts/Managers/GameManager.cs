@@ -25,13 +25,20 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     private int currentScore = 0;
     private bool isPlaying = true;
     private Player subscribedPlayer;
+    
+    // Sistema de victoria por kills acumulados (solo Nivel 1-2)
+    private int requiredKills = 0;
+    private int enemiesKilled = 0;
 
     private void Start()
     {
         // Asegurar que el juego esté en estado normal al inicio
         Time.timeScale = 1f;
         
-        // ✅ Conectar el evento de muerte del jugador
+        // Establecer meta de kills según el nivel
+        SetRequiredKillsForLevel();
+        
+        // Conectar el evento de muerte de enemigos
         Enemy.OnAnyEnemyKilled += IncreaseScore;
         
         var player = Player.Instance;
@@ -39,14 +46,33 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         {
             subscribedPlayer = player;
             subscribedPlayer.OnPlayerDead += Defeat;
-            Debug.Log("[GameManager] ✅ Conectado a eventos de Player (muerte) y Enemy (score)");
+            // Debug.Log("[GameManager] ✅ Conectado a eventos de Player (muerte) y Enemy (score)");
         }
         else
         {
             Debug.LogWarning("[GameManager] ⚠️ Player.Instance es NULL! No se puede conectar evento de muerte");
         }
     }
+    
+    private void SetRequiredKillsForLevel()
+    {
+        requiredKills = levelNumber switch
+        {
+            1 => 15,  // Nivel 1: 15 kills (3-4 min)
+            2 => 25,  // Nivel 2: 25 kills (5-6 min)
+            _ => 0    // Nivel 3, 4 y otros: sin límite (usa sistema original)
+        };
+        
+        if (requiredKills > 0)
+        {
+            Debug.Log($"[GameManager] 🎯 Nivel {levelNumber}: Necesitas {requiredKills} kills para ganar");
+        }
+        
+        // Forzar actualización del UI
+        OnScoreUpdated?.Invoke();
+    }
 
+    
     /// <summary>
     /// OBSOLETO: Ahora lo maneja ScoreService
     /// </summary>
@@ -56,9 +82,14 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         if (!isPlaying)
             return;
         currentScore += score;
+        enemiesKilled++;
         OnScoreUpdated?.Invoke();
-        if (currentScore >= requiredScore)
+        
+        // Victoria solo para Nivel 1-2 (Nivel 3-4 sin condición de victoria)
+        if (requiredKills > 0 && enemiesKilled >= requiredKills)
+        {
             Victory();
+        }
     }
 
     private void Victory()
@@ -127,9 +158,16 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     public int RequiredScore => requiredScore;
     public int CurrentScore => currentScore;
     public float Progress => (float)currentScore / (float)requiredScore;
+    
+    // Propiedades para sistema de victoria (solo Nivel 1-2)
+    public int TotalEnemies => requiredKills;
+    public int EnemiesKilled => enemiesKilled;
+    public float EnemyProgress => requiredKills > 0 ? (float)enemiesKilled / (float)requiredKills : 0f;
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+        
         // Cleanup de eventos
         Enemy.OnAnyEnemyKilled -= IncreaseScore;
         

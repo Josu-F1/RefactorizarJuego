@@ -72,7 +72,7 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
         // Registrar efectos del database
         RegisterEffectsFromDatabase();
         
-        Debug.Log("[VFXSystemComposer] Sistema VFX inicializado con principios SOLID");
+        // Debug.Log("[VFXSystemComposer] Sistema VFX inicializado con principios SOLID");
     }
     
     private void RegisterEffectsFromDatabase()
@@ -147,7 +147,7 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
         }
         
         gameEventObserver = observerComponent;
-        Debug.Log("[VFXSystemComposer] Game event observer created");
+        // Debug.Log("[VFXSystemComposer] Game event observer created");
     }
     
     private void PrewarmAllPools()
@@ -162,7 +162,7 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
             }
         }
         
-        Debug.Log("[VFXSystemComposer] All pools prewarmed");
+        // Debug.Log("[VFXSystemComposer] All pools prewarmed");
     }
     
     // Implementación de IEffectSpawner para API pública
@@ -279,8 +279,9 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
     public IGameEventObserver GetGameEventObserver() => gameEventObserver;
     
     // Cleanup
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
         if (effectPool != null)
         {
             // Cleanup pool si es necesario

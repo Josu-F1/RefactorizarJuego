@@ -22,6 +22,7 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
     protected override void Awake()
     {
         base.Awake();
+        // Player NO debe persistir entre escenas - se destruye al cambiar de nivel
         // [REMOVED] health = GetComponent<Health>(); - Migrated to CharacterSystemComposer
     }
     
@@ -45,7 +46,7 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
         if (deathHandler != null)
         {
             deathHandler.OnDeath += () => OnPlayerDead?.Invoke();
-            Debug.Log("[Player] ✅ Usando CharacterSystemComposer (Clean Architecture)");
+            // Debug.Log("[Player] ✅ Usando CharacterSystemComposer (Clean Architecture)");
         }
         else
         {
@@ -61,8 +62,10 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
         }
     }
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+        
         // Limpiar el controlador
         if (characterSystemComposer != null && gameObject != null)
         {

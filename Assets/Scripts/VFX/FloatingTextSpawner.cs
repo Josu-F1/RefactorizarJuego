@@ -32,7 +32,7 @@ public class FloatingTextSpawner : MonoBehaviour
         
         if (vfxSystemComposer != null)
         {
-            Debug.Log("[FloatingTextSpawner] Delegando a VFXSystemComposer (SOLID refactorizado)");
+            // Debug.Log("[FloatingTextSpawner] Delegando a VFXSystemComposer (SOLID refactorizado)");
             // El VFXGameEventObserver ya maneja estos eventos automáticamente
             return;
         }

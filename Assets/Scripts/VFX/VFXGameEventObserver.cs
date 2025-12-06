@@ -96,13 +96,13 @@ public class VFXGameEventObserver : MonoBehaviour, IGameEventObserver
         {
             // Suscribirse al evento global de Enemy
             Enemy.OnAnyEnemyKilled += OnEnemyKilled;
-            Debug.Log("[VFXGameEventObserver] Subscribed to Score events");
+            // Debug.Log("[VFXGameEventObserver] Subscribed to Score events");
         }
         
         if (observeDeathEvents)
         {
             // Para muerte de personajes, se puede extender con un sistema de eventos más general
-            Debug.Log("[VFXGameEventObserver] Death events observer ready");
+            // Debug.Log("[VFXGameEventObserver] Death events observer ready");
         }
     }
     
@@ -154,7 +154,7 @@ public class VFXGameEventObserver : MonoBehaviour, IGameEventObserver
         var config = effectConfigs["death"];
         effectSpawner.SpawnEffect(EffectType.ParticleExplosion, target, config);
         
-        Debug.Log("[VFXGameEventObserver] Death effect spawned");
+        // Debug.Log("[VFXGameEventObserver] Death effect spawned");
     }
     
     public void OnExplosion(Vector3 position, float intensity)

@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // El tipo o miembro está obsoleto
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,14 +12,19 @@ public class DamageOnTrigger : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        // Usar CharacterSystemComposer
-        var characterSystem = CharacterSystemComposer.Instance;
-        if (characterSystem != null)
+        // Aplicar daño directo usando sistema legacy Health
+        Health health = other.GetComponent<Health>();
+        if (health != null)
         {
-            var controller = characterSystem.GetController(other.gameObject);
-            if (controller != null && controller.CharacterType != characterType)
+            ICharacter hitCharacter = other.GetComponent<ICharacter>();
+            if (hitCharacter.CharacterType != characterType)
             {
-                controller.NotifyEvent(CharacterEvent.HealthDepleted, damage);
+                health.TakeDamage(damage);
+                
+                // Notificar evento si está registrado en CharacterSystemComposer
+                var characterSystem = CharacterSystemComposer.Instance;
+                var controller = characterSystem?.GetController(other.gameObject);
+                controller?.NotifyEvent(CharacterEvent.HealthDepleted, damage);
             }
             return;
         }
