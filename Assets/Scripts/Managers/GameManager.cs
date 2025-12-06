@@ -78,6 +78,13 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
         // USAR EL NUEVO SISTEMA REFACTORIZADO
         string username = DataManagerComposer.CurrentUsername;
+
+        if (string.IsNullOrEmpty(username))
+        {
+            Debug.LogWarning("[GameManager] No hay usuario activo. Se omite guardado de progreso en este nivel.");
+            yield break;
+        }
+
         int actualLevel = DataManagerComposer.GetPlayerLevel(username);
 
         Debug.Log($"[GameManager] GUARDANDO PROGRESO - Usuario: {username}, Nivel actual: {actualLevel}, Nivel completado: {levelNumber}");
