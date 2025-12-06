@@ -152,39 +152,7 @@ public class AbilitySystemComposer : MonoBehaviourSingleton<AbilitySystemCompose
         }
     }
     
-    /// <summary>
-    /// Migra habilidades legacy a nuevo sistema
-    /// </summary>
-    [ContextMenu("Migrate Legacy Abilities")]
-    public void MigrateLegacyAbilities()
-    {
-        // Migrar DashAbility
-        var dashAbilities = FindObjectsOfType<DashAbility>();
-        foreach (var legacy in dashAbilities)
-        {
-            var modernAbility = new DashAbilityStrategy(legacy.gameObject);
-            RegisterAbility(legacy.gameObject, modernAbility);
-        }
-        
-        // Migrar InvisibleAbility
-        var invisibleAbilities = FindObjectsOfType<InvisibleAbility>();
-        foreach (var legacy in invisibleAbilities)
-        {
-            var modernAbility = new InvisibilityAbilityStrategy(legacy.gameObject);
-            RegisterAbility(legacy.gameObject, modernAbility);
-        }
-        
-        // Migrar BlindAbility
-        var blindAbilities = FindObjectsOfType<BlindAbility>();
-        foreach (var legacy in blindAbilities)
-        {
-            var modernAbility = new BlindAbilityStrategy(legacy.gameObject);
-            RegisterAbility(legacy.gameObject, modernAbility);
-        }
-        
-        if (enableDebugLogging)
-            Debug.Log($"[AbilitySystemComposer] Migradas {dashAbilities.Length + invisibleAbilities.Length + blindAbilities.Length} habilidades legacy");
-    }
+    // [REMOVED] MigrateLegacyAbilities - Legacy abilities deprecadas, usar AbilityService directamente
     
     private void OnDestroy()
     {

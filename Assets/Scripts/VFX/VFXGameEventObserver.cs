@@ -1,4 +1,5 @@
 #pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0414 // Field is assigned but never used
 using UnityEngine;
 using System;
 using System.Collections.Generic;
@@ -87,9 +88,8 @@ public class VFXGameEventObserver : MonoBehaviour, IGameEventObserver
     {
         if (observeHealthEvents)
         {
-            // Suscribirse al evento global de Health usando adaptador
-            Health.OnAnyCharacterHealthChanged += OnHealthChangedLegacy;
-            Debug.Log("[VFXGameEventObserver] Subscribed to Health events");
+            // TODO: Suscribirse a EventBus (CharacterDamagedEvent, CharacterHealedEvent)
+            Debug.LogWarning("[VFXGameEventObserver] Health events disabled - Health legacy deprecated");
         }
         
         if (observeScoreEvents)
@@ -108,11 +108,6 @@ public class VFXGameEventObserver : MonoBehaviour, IGameEventObserver
     
     private void UnsubscribeFromEvents()
     {
-        if (observeHealthEvents)
-        {
-            Health.OnAnyCharacterHealthChanged -= OnHealthChangedLegacy;
-        }
-        
         if (observeScoreEvents)
         {
             Enemy.OnAnyEnemyKilled -= OnEnemyKilled;
@@ -137,11 +132,8 @@ public class VFXGameEventObserver : MonoBehaviour, IGameEventObserver
         Debug.Log($"[VFXGameEventObserver] Health effect spawned: {configKey} ({amount})");
     }
     
-    // Método adaptador para el evento Health legacy
-    private void OnHealthChangedLegacy(float amount, Health health)
-    {
-        OnHealthChanged(amount, health.transform);
-    }
+    // [REMOVED] OnHealthChangedLegacy - Health legacy deprecated
+    // TODO: Migrar a EventBus (CharacterDamagedEvent, CharacterHealedEvent)
     
     public void OnScoreEarned(int score, Transform target)
     {

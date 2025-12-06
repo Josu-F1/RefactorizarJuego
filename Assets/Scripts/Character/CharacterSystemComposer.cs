@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System;
 
@@ -130,12 +131,7 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
             }
             else
             {
-                // Fallback al sistema legacy
-                var health = enemy.GetComponent<Health>();
-                if (health != null)
-                {
-                    health.TakeDamage(100000f);
-                }
+                Debug.LogWarning($"[CharacterSystemComposer] Enemy {enemy.name} sin controller - no se puede matar");
             }
         }
         
@@ -153,16 +149,7 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
             var controller = GetController(player.gameObject);
             if (controller != null)
             {
-                // En el futuro se podría tener un HealingComponent
-                Debug.Log("[CharacterSystemComposer] Player heal cheat - using legacy Health");
-            }
-            
-            // Usar el sistema de Health existente (ya refactorizado)
-            var health = player.GetComponent<Health>();
-            if (health != null)
-            {
-                health.Heal(100000f);
-                Debug.Log("[CharacterSystemComposer] Player healed using HealthSystemComposer");
+                Debug.LogWarning("[CharacterSystemComposer] Player no tiene controller registrado");
             }
         }
     }

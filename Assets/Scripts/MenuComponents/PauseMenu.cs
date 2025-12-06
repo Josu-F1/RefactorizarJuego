@@ -1,23 +1,30 @@
-#pragma warning disable 0649
-
 using UnityEngine;
+using MenuSystem;
 
-[System.Obsolete("Use MenuSystemComposer instead")]
-public class PauseMenu : MonoBehaviour
+/// <summary>
+/// ✅ Clean Architecture - Pause Menu usando MenuSystemComposer
+/// </summary>
+public class PauseMenu : BaseMenu
 {
-    private bool isPausing = false;
-
-    [SerializeField]
-    private GameObject pauseLayer;
+    [SerializeField] private GameObject pauseLayer;
     
-    private void Start()
+    protected override void Awake()
     {
-        // Silenciado: Sistema legacy en uso hasta completar migración
-        Resume();
+        base.Awake();
+        menuName = "PauseMenu";
+        pauseGameWhenVisible = true; // ✅ Auto-pause when shown
     }
+    
+    protected override void Start()
+    {
+        base.Start(); // ✅ Register with MenuSystemComposer
+        Resume();
+        Debug.Log("[PauseMenu] ✅ Using MenuSystemComposer (Clean Architecture)");
+    }
+    
     public void HandlePause()
     {
-        if (isPausing)
+        if (IsVisible)
         {
             Resume();
         }
@@ -26,17 +33,16 @@ public class PauseMenu : MonoBehaviour
             Pause();
         }
     }
+    
     private void Pause()
     {
-        if (Time.timeScale == 0) return;
-        isPausing = true;
-        pauseLayer.SetActive(true);
-        Time.timeScale = 0;
+        if (pauseLayer != null) pauseLayer.SetActive(true);
+        menuSystem?.PauseGame();
     }
+    
     private void Resume()
     {
-        isPausing = false;
-        pauseLayer.SetActive(false);
-        Time.timeScale = 1;
+        if (pauseLayer != null) pauseLayer.SetActive(false);
+        menuSystem?.ResumeGame();
     }
 }

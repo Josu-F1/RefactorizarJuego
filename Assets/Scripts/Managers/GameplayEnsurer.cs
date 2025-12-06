@@ -47,15 +47,15 @@ public class GameplayEnsurer : MonoBehaviour
         {
             Debug.Log($"[GameplayEnsurer] ✅ Jugador encontrado: {player.name}");
             
-            // Verificar que el jugador tenga Health
-            Health health = player.GetComponent<Health>();
-            if (health != null)
+            // Verificar CharacterSystemComposer (Clean Architecture)
+            CharacterSystemComposer characterSystem = FindObjectOfType<CharacterSystemComposer>();
+            if (characterSystem != null)
             {
-                Debug.Log($"[GameplayEnsurer] ❤️ Salud del jugador: {health.Percentage * 100:F0}%");
+                Debug.Log("[GameplayEnsurer] ✅ CharacterSystemComposer activo (Clean Architecture)");
             }
             else
             {
-                Debug.LogError("[GameplayEnsurer] ❌ Jugador no tiene componente Health!");
+                Debug.LogError("[GameplayEnsurer] ❌ CharacterSystemComposer no encontrado!");
             }
         }
         else

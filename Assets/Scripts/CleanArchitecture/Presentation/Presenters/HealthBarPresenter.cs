@@ -16,10 +16,10 @@ namespace CleanArchitecture.Presentation.Presenters
         [SerializeField] private Image healthBarImage;
         
         [Header("Configuration")]
-        [SerializeField] private bool autoFindHealth = true;
+        [SerializeField] private bool autoFind = true;
 
         private IPlayerService playerService;
-        private global::Health playerHealth;
+        private ICharacterController characterController;
 
         private void Start()
         {
@@ -31,84 +31,77 @@ namespace CleanArchitecture.Presentation.Presenters
             // Obtener PlayerService
             playerService = ServiceLocator.Instance.Get<IPlayerService>();
 
-            if (autoFindHealth)
+            if (autoFind)
             {
-                FindPlayerHealth();
+                FindPlayerCharacter();
             }
 
-            if (playerHealth != null)
+            if (characterController != null)
             {
                 SubscribeToHealthEvents();
                 UpdateHealthBar(0);
             }
             else
             {
-                Debug.LogWarning("[HealthBarPresenter] No se encontró Health component");
+                Debug.LogWarning("[HealthBarPresenter] No se encontró CharacterController");
             }
         }
 
-        private void FindPlayerHealth()
+        private void FindPlayerCharacter()
         {
-            // Intentar obtener del PlayerService
-            if (playerService != null)
-            {
-                var playerTransform = playerService.PlayerTransform;
-                if (playerTransform != null)
-                {
-                    playerHealth = playerTransform.GetComponent<global::Health>();
-                }
-            }
-
-            // Fallback: buscar Player.Instance
-            if (playerHealth == null)
+            // Usar CharacterSystemComposer (Clean Architecture)
+            var characterSystem = CharacterSystemComposer.Instance;
+            if (characterSystem != null)
             {
                 var player = global::Player.Instance;
                 if (player != null)
                 {
-                    playerHealth = player.GetComponent<global::Health>();
+                    characterController = characterSystem.GetController(player.gameObject);
                 }
+            }
+            
+            if (characterController == null)
+            {
+                Debug.LogError("[HealthBarPresenter] ❌ CharacterSystemComposer no encontrado!");
             }
         }
 
         private void SubscribeToHealthEvents()
         {
-            if (playerHealth != null)
+            // Actualizar periódicamente (TODO: usar EventBus cuando esté disponible)
+            InvokeRepeating(nameof(UpdateHealthBarPeriodic), 0f, 0.1f);
+        }
+
+        private void UpdateHealthBarPeriodic()
+        {
+            // TODO: Implementar con EventBus (CharacterDamagedEvent, CharacterHealedEvent)
+            // Por ahora, mantener fillAmount estático
+            if (healthBarImage != null && characterController != null)
             {
-                playerHealth.OnHealthChanged += UpdateHealthBar;
+                // healthBarImage.fillAmount se actualizará desde EventBus
             }
         }
 
-        private void UpdateHealthBar(float changedAmount)
+        private void UpdateHealthBar(float percentage)
         {
-            if (playerHealth == null || healthBarImage == null) return;
-            
-            healthBarImage.fillAmount = playerHealth.Percentage;
+            if (healthBarImage == null) return;
+            healthBarImage.fillAmount = percentage;
         }
 
         private void OnDestroy()
         {
-            if (playerHealth != null)
-            {
-                playerHealth.OnHealthChanged -= UpdateHealthBar;
-            }
+            CancelInvoke(nameof(UpdateHealthBarPeriodic));
         }
 
         /// <summary>
-        /// Permite establecer el Health manualmente (útil para testing)
+        /// Permite establecer el CharacterController manualmente (útil para testing)
         /// </summary>
-        public void SetHealth(global::Health health)
+        public void SetCharacterController(ICharacterController controller)
         {
-            if (playerHealth != null)
-            {
-                playerHealth.OnHealthChanged -= UpdateHealthBar;
-            }
-
-            playerHealth = health;
-            
-            if (playerHealth != null)
+            characterController = controller;
+            if (characterController != null)
             {
                 SubscribeToHealthEvents();
-                UpdateHealthBar(0);
             }
         }
     }

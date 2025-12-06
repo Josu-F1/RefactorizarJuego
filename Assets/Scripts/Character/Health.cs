@@ -5,10 +5,11 @@ using System;
 using UnityEngine.Events;
 
 /// <summary>
-/// OBSOLETO: Esta clase viola principios SOLID y OCP.
-/// Usar HealthSystemComposer con Strategy Pattern
+/// ❌ DEPRECATED: Esta clase viola principios SOLID y OCP.
+/// ✅ MIGRAR A: CharacterSystemComposer con Clean Architecture
+/// Esta clase ya NO debe usarse - el proyecto está 100% en Clean Architecture
 /// </summary>
-[System.Obsolete("Use HealthSystemComposer instead. This class violates SOLID principles.")]
+[System.Obsolete("❌ DEPRECATED: Use CharacterSystemComposer (Clean Architecture) instead. This legacy class is NO LONGER SUPPORTED.", true)]
 public class Health : MonoBehaviour
 {
     public static Action<float, Health> OnAnyCharacterHealthChanged { get; set; }

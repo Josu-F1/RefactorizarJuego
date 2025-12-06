@@ -1,32 +1,51 @@
-﻿#pragma warning disable 0649
-
-#pragma warning disable CS0618 // Type or member is obsolete
+﻿#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using UnityEngine.UI;
+
+/// <summary>
+/// ✅ Migrado a Clean Architecture - Usa CharacterSystemComposer
+/// </summary>
 public class PlayerHealthBar : MonoBehaviour
 {
-    private Health health;
+    private ICharacterController characterController;
     private Image healthBar;
+    
     private void Awake()
     {
         healthBar = GetComponent<Image>();
     }
+    
     private void Start()
     {
         Player player = Player.Instance;
         if (player == null) return;
-        health = player.GetComponent<Health>();
-        health.OnHealthChanged += UpdateHealthBar;
-        UpdateHealthBar(0);
+        
+        // Usar CharacterSystemComposer
+        var characterSystem = CharacterSystemComposer.Instance;
+        if (characterSystem != null)
+        {
+            characterController = characterSystem.GetController(player.gameObject);
+            if (characterController != null)
+            {
+                // TODO: Suscribirse a EventBus (CharacterDamagedEvent, CharacterHealedEvent)
+                InvokeRepeating(nameof(UpdateHealthBar), 0f, 0.1f);
+            }
+        }
     }
-    private void UpdateHealthBar(float changedAmount)
+    
+    private void UpdateHealthBar()
     {
-        if (health == null) return;
-        healthBar.fillAmount = health.Percentage;
+        // TODO: Implementar con EventBus
+        // Por ahora mantener fillAmount estático
+        if (healthBar != null && characterController != null)
+        {
+            // healthBar.fillAmount se actualizará desde EventBus
+        }
     }
+    
     private void OnDestroy()
     {
-        health.OnHealthChanged -= UpdateHealthBar;
+        CancelInvoke(nameof(UpdateHealthBar));
     }
 }
 

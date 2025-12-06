@@ -1,8 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 
+/// <summary>
+/// ❌ DEPRECATED: Use AbilitySystemComposer with BlindAbilityStrategy instead
+/// </summary>
+[System.Obsolete("❌ DEPRECATED: Use AbilitySystemComposer (Clean Architecture) instead. This legacy class is NO LONGER SUPPORTED.", true)]
 public class BlindAbility : MonoBehaviour
 {
     [SerializeField] private GameObject blindLight;

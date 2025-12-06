@@ -6,15 +6,15 @@ public class Explosion : PoolObject
     public CharacterType CharacterType { get; set; }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Health health = other.GetComponent<Health>();
-        if (health != null)
+        // Usar CharacterSystemComposer
+        var characterSystem = CharacterSystemComposer.Instance;
+        if (characterSystem != null)
         {
-            ICharacter hitCharacter = other.GetComponent<ICharacter>();
-            if (hitCharacter.CharacterType != CharacterType)
+            var controller = characterSystem.GetController(other.gameObject);
+            if (controller != null && controller.CharacterType != CharacterType)
             {
-                health.TakeDamage(Damage);
+                controller.NotifyEvent(CharacterEvent.HealthDepleted, Damage);
             }
-            return;
         }
         DestructibleTilemap destructibleTilemap = other.GetComponent<DestructibleTilemap>();
         if (destructibleTilemap != null)

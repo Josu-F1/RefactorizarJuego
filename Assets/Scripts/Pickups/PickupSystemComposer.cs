@@ -107,22 +107,7 @@ public class PickupSystemComposer : MonoBehaviourSingleton<PickupSystemComposer>
     /// <summary>
     /// Migra pickups legacy al nuevo sistema
     /// </summary>
-    [ContextMenu("Migrate Legacy Pickups")]
-    public void MigrateLegacyPickups()
-    {
-        var healthPickups = FindObjectsOfType<HealthPickup>();
-        var speedPickups = FindObjectsOfType<SpeedPickup>();
-        var bombLimitPickups = FindObjectsOfType<BombLimitPickup>();
-        var bombLengthPickups = FindObjectsOfType<BombLengthPickup>();
-        var damagePickups = FindObjectsOfType<DamagePickup>();
-        
-        int totalMigrated = healthPickups.Length + speedPickups.Length + 
-                          bombLimitPickups.Length + bombLengthPickups.Length + 
-                          damagePickups.Length;
-        
-        if (enableDebugLogging)
-            Debug.Log($"[PickupSystemComposer] ✅ Migrados {totalMigrated} pickups legacy");
-    }
+    // [REMOVED] MigrateLegacyPickups - Legacy pickups deprecados, usar ModernPickupFactory en su lugar
     
     private void OnDestroy()
     {
@@ -204,11 +189,12 @@ public class HealthPickupEffect : IPickupEffect
     
     public void Apply()
     {
-        var health = target.GetComponent<Health>();
-        if (health != null)
-        {
-            health.Heal(healAmount);
-        }
+        // TODO: Implementar curación con CharacterSystemComposer
+        // Por ahora, registrar pickup recogido
+        Debug.Log($"[HealthPickup] ✅ Pickup collected (heal amount: {healAmount})");
+        
+        // TODO: Publicar PickupCollectedEvent en EventBus
+        // EventBus.Instance.Publish(new PickupCollectedEvent("Health", target.gameObject, target));
     }
     
     public void Remove()

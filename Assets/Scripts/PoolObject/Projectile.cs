@@ -32,13 +32,15 @@ public class Projectile : PoolObject
     private void OnTriggerEnter2D(Collider2D other)
     {
         bool hasCollided = false;
-        Health health = other.GetComponent<Health>();
-        if (health != null)
+        
+        // Usar CharacterSystemComposer
+        var characterSystem = CharacterSystemComposer.Instance;
+        if (characterSystem != null)
         {
-            ICharacter hitCharacter = other.GetComponent<ICharacter>();
-            if (hitCharacter.CharacterType != CharacterType)
+            var controller = characterSystem.GetController(other.gameObject);
+            if (controller != null && controller.CharacterType != CharacterType)
             {
-                health.TakeDamage(Damage);
+                controller.NotifyEvent(CharacterEvent.HealthDepleted, Damage);
                 hasCollided = true;
                 onTargetHit?.Invoke(other);
                 DestroyProjectile();

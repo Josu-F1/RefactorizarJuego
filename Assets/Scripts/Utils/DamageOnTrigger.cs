@@ -11,13 +11,14 @@ public class DamageOnTrigger : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Health health = other.GetComponent<Health>();
-        if (health != null)
+        // Usar CharacterSystemComposer
+        var characterSystem = CharacterSystemComposer.Instance;
+        if (characterSystem != null)
         {
-            ICharacter hitCharacter = other.GetComponent<ICharacter>();
-            if (hitCharacter.CharacterType != characterType)
+            var controller = characterSystem.GetController(other.gameObject);
+            if (controller != null && controller.CharacterType != characterType)
             {
-                health.TakeDamage(damage);
+                controller.NotifyEvent(CharacterEvent.HealthDepleted, damage);
             }
             return;
         }

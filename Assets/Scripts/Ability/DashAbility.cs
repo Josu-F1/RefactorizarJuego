@@ -1,10 +1,14 @@
-#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0414 // Field is assigned but never used
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Vector2Extensions;
 using Pathfinding;
 
+/// <summary>
+/// ❌ DEPRECATED: Use AbilitySystemComposer with DashAbilityStrategy instead
+/// </summary>
+[System.Obsolete("❌ DEPRECATED: Use AbilitySystemComposer (Clean Architecture) instead. This legacy class is NO LONGER SUPPORTED.", true)]
 public class DashAbility : MonoBehaviour
 {
     [SerializeField] private float dashSpeed = 40;

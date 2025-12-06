@@ -13,11 +13,19 @@ public class DamageOnCollision : MonoBehaviour
     }
     private void OnCollisionEnter2D(Collision2D other)
     {
-        Health health = other.gameObject.GetComponent<Health>();
-        if (health == null) return;
-        ICharacter hitCharacter = health.GetComponent<ICharacter>();
-        if (hitCharacter.CharacterType == characterType) return;
-        health.TakeDamage(damage);
-        if (shouldDieAfterCollision) GetComponent<Health>()?.Die();
+        // Usar CharacterSystemComposer
+        var characterSystem = CharacterSystemComposer.Instance;
+        if (characterSystem == null) return;
+        
+        var controller = characterSystem.GetController(other.gameObject);
+        if (controller == null || controller.CharacterType == characterType) return;
+        
+        controller.NotifyEvent(CharacterEvent.HealthDepleted, damage);
+        
+        if (shouldDieAfterCollision)
+        {
+            var selfController = characterSystem.GetController(gameObject);
+            selfController?.NotifyEvent(CharacterEvent.Death);
+        }
     }
 }

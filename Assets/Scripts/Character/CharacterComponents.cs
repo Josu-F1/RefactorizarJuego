@@ -142,41 +142,34 @@ public class DeathHandler : IDeathHandler
 /// Manejador de eventos de salud
 /// Principio: Single Responsibility Principle (SRP) - Solo bridge Health-Character
 /// </summary>
+/// <summary>
+/// ⚠️ DEPRECATED: Este componente usa Health legacy
+/// TODO: Migrar a CharacterSystemComposer con EventBus
+/// </summary>
 public class HealthEventHandler : IHealthEventHandler
 {
     public bool IsActive { get; private set; }
     public event Action OnHealthDepleted;
     
     private ICharacterController controller;
-    private Health health;
+    // private Health health; // REMOVED - legacy class deprecated
     
     public void Initialize(ICharacterController controller)
     {
         this.controller = controller;
         IsActive = true;
-        SubscribeToHealth();
+        // SubscribeToHealth(); // DISABLED - Health legacy deprecated
     }
     
     public void SubscribeToHealth()
     {
-        if (controller?.GameObject != null)
-        {
-            health = controller.GameObject.GetComponent<Health>();
-            if (health != null)
-            {
-                health.OnDead += HandleHealthDepleted;
-                Debug.Log("[HealthEventHandler] Subscribed to Health events");
-            }
-        }
+        // DISABLED - Health legacy deprecated
+        // TODO: Usar EventBus.Subscribe<CharacterDiedEvent>()
     }
     
     public void UnsubscribeFromHealth()
     {
-        if (health != null)
-        {
-            health.OnDead -= HandleHealthDepleted;
-            Debug.Log("[HealthEventHandler] Unsubscribed from Health events");
-        }
+        // DISABLED - Health legacy deprecated
     }
     
     private void HandleHealthDepleted()
@@ -190,9 +183,7 @@ public class HealthEventHandler : IHealthEventHandler
     
     public void OnDestroy()
     {
-        UnsubscribeFromHealth();
         IsActive = false;
         OnHealthDepleted = null;
-        health = null;
     }
 }

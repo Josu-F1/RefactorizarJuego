@@ -1,20 +1,31 @@
 using UnityEngine;
 using UnityEngine.UI;
+using MenuSystem;
 
-[System.Obsolete("Use MenuSystemComposer instead")]
-public class MainMenu : MonoBehaviour
+/// <summary>
+/// ✅ Clean Architecture - Main Menu usando MenuSystemComposer
+/// </summary>
+public class MainMenu : BaseMenu
 {
     public GameObject loginPanel;
     public GameObject mainMenuPanel;
     public Text userNameText;
     public Button logoutButton;
 
-    void Start()
+    protected override void Awake()
     {
-        Debug.LogWarning("[OBSOLETE] MainMenu is deprecated. Use MenuSystemComposer instead.");
+        base.Awake();
+        menuName = "MainMenu";
+    }
+
+    protected override void Start()
+    {
+        base.Start(); // ✅ Register with MenuSystemComposer
+        
+        if (logoutButton != null) 
+            logoutButton.onClick.AddListener(OnLogout);
         
         string userName = PlayerPrefs.GetString("CurrentUser", "");
-        if (logoutButton != null) logoutButton.onClick.AddListener(OnLogout);
         if (string.IsNullOrEmpty(userName))
         {
             if (loginPanel != null) loginPanel.SetActive(true);
@@ -26,6 +37,8 @@ public class MainMenu : MonoBehaviour
             if (mainMenuPanel != null) mainMenuPanel.SetActive(true);
             if (userNameText != null) userNameText.text = $"Bienvenido, {userName}";
         }
+        
+        Debug.Log("[MainMenu] ✅ Using MenuSystemComposer (Clean Architecture)");
     }
 
     public void OnLogout()

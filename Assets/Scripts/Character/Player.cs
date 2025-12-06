@@ -15,59 +15,49 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
     public CharacterType CharacterType => CharacterType.Player;
     public Action OnPlayerDead { get; set; }
     
-    private Health health;
+    // [REMOVED] private Health health; - Migrated to CharacterSystemComposer
     private ICharacterController characterController;
     private CharacterSystemComposer characterSystemComposer;
     
     protected override void Awake()
     {
         base.Awake();
-        health = GetComponent<Health>();
+        // [REMOVED] health = GetComponent<Health>(); - Migrated to CharacterSystemComposer
         
-        // Intentar obtener el sistema refactorizado
+        // Obtener el sistema refactorizado
         characterSystemComposer = CharacterSystemComposer.Instance;
     }
     
     private void Start()
     {
-        // Si existe el sistema refactorizado, usarlo
-        if (characterSystemComposer != null)
+        // FORZAR uso de CharacterSystemComposer
+        if (characterSystemComposer == null)
         {
-            characterController = characterSystemComposer.CreateCharacterController(CharacterType.Player, gameObject);
-            
-            // Conectar eventos para compatibilidad
-            var deathHandler = characterController?.GetComponent<IDeathHandler>();
-            if (deathHandler != null)
-            {
-                deathHandler.OnDeath += () => OnPlayerDead?.Invoke();
-                Debug.Log("[Player] Usando CharacterSystemComposer (SOLID refactorizado)");
-            }
+            Debug.LogError("[Player] ❌ CharacterSystemComposer no encontrado! El juego requiere Clean Architecture.");
+            return;
+        }
+        
+        characterController = characterSystemComposer.CreateCharacterController(CharacterType.Player, gameObject);
+        
+        // Conectar eventos
+        var deathHandler = characterController?.GetComponent<IDeathHandler>();
+        if (deathHandler != null)
+        {
+            deathHandler.OnDeath += () => OnPlayerDead?.Invoke();
+            Debug.Log("[Player] ✅ Usando CharacterSystemComposer (Clean Architecture)");
         }
         else
         {
-            // Sistema legacy (silenciado hasta completar migración)
-            health.OnDead += Die;
+            Debug.LogError("[Player] ❌ No se pudo crear CharacterController");
         }
-    }
-    
-    private void Die()
-    {
-        OnPlayerDead?.Invoke();
-        gameObject.SetActive(false);
     }
     
     private void OnDestroy()
     {
-        // Limpiar el controlador si existe
+        // Limpiar el controlador
         if (characterSystemComposer != null && gameObject != null)
         {
             characterSystemComposer.CleanupController(gameObject);
-        }
-        
-        // Sistema legacy cleanup
-        if (health != null)
-        {
-            health.OnDead -= Die;
         }
     }
 }
