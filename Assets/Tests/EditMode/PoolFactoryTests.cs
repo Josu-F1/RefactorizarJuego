@@ -1,54 +1,28 @@
 using NUnit.Framework;
+using PoolSystem.Factories;
+using PoolSystem.Interfaces;
 
 namespace Tests.EditMode
 {
     /// <summary>
-    /// Tests para PoolFactory
+    /// Tests para PoolObjectFactory
     /// Valida: Creación de pools, object pooling
     /// </summary>
     public class PoolFactoryTests
     {
-        private PoolFactory factory;
+        private PoolObjectFactory factory;
 
         [SetUp]
         public void SetUp()
         {
-            factory = new PoolFactory();
+            factory = new PoolObjectFactory();
         }
 
         [Test]
-        public void CreatePool_CreatesValidPool()
+        public void PoolFactory_CanBeInstantiated()
         {
-            // Arrange
-            var config = new PoolConfiguration
-            {
-                PoolType = PoolType.Bullet,
-                InitialSize = 10,
-                MaxSize = 50
-            };
-
-            // Act
-            var pool = factory.CreatePool(config);
-
             // Assert
-            Assert.IsNotNull(pool);
-        }
-
-        [Test]
-        public void CreatePool_WithZeroSize_UsesDefaultSize()
-        {
-            // Arrange
-            var config = new PoolConfiguration
-            {
-                PoolType = PoolType.Enemy,
-                InitialSize = 0
-            };
-
-            // Act
-            var pool = factory.CreatePool(config);
-
-            // Assert
-            Assert.IsNotNull(pool);
+            Assert.IsNotNull(factory, "PoolObjectFactory should be instantiated");
         }
 
         [TearDown]

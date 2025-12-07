@@ -4,7 +4,7 @@
     "references": [
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner",
-        "Assembly-CSharp"
+        "GUID:1f9d545c44917d341aeb183d5f34760b"
     ],
     "includePlatforms": [
         "Editor"

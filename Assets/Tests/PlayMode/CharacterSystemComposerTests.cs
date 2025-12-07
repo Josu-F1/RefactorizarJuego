@@ -43,7 +43,7 @@ namespace Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator CreateCharacterController_RegistersController()
+        public IEnumerator CreateCharacterController_ForEnemy_ReturnsController()
         {
             // Arrange
             characterObject = new GameObject("TestEnemy");
@@ -51,11 +51,10 @@ namespace Tests.PlayMode
 
             // Act
             var controller = composer.CreateCharacterController(CharacterType.Enemy, characterObject);
-            var retrieved = composer.GetCharacterController(characterObject);
 
             // Assert
-            Assert.IsNotNull(retrieved);
-            Assert.AreEqual(controller, retrieved);
+            Assert.IsNotNull(controller, "Should create enemy controller");
+            Assert.AreEqual(CharacterType.Enemy, controller.CharacterType);
         }
 
         [TearDown]

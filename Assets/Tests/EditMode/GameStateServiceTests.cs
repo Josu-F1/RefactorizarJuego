@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using CleanArchitecture.Infrastructure.Services;
 
 namespace Tests.EditMode
 {

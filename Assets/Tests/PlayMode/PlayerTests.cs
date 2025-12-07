@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete warnings suppressed for legacy tests
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;

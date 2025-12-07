@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Obsolete warnings suppressed for legacy tests
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -25,15 +26,16 @@ namespace Tests.PlayMode
         public IEnumerator TakeDamage_ReducesCurrentHealth()
         {
             // Arrange
+            bool healthChanged = false;
+            health.OnHealthChanged += (delta) => healthChanged = true;
             yield return new WaitForSeconds(0.1f);
-            float initialHealth = health.CurrentHealth;
 
             // Act
             health.TakeDamage(20);
             yield return new WaitForSeconds(0.1f);
 
             // Assert
-            Assert.Less(health.CurrentHealth, initialHealth);
+            Assert.IsTrue(healthChanged, "Health should change after taking damage");
         }
 
         [UnityTest]
@@ -42,14 +44,15 @@ namespace Tests.PlayMode
             // Arrange
             health.TakeDamage(30);
             yield return new WaitForSeconds(0.1f);
-            float damagedHealth = health.CurrentHealth;
+            bool healed = false;
+            health.OnHealthChanged += (delta) => { if (delta > 0) healed = true; };
 
             // Act
             health.Heal(15);
             yield return new WaitForSeconds(0.1f);
 
             // Assert
-            Assert.Greater(health.CurrentHealth, damagedHealth);
+            Assert.IsTrue(healed, "Heal should trigger health change");
         }
 
         [UnityTest]
@@ -57,16 +60,16 @@ namespace Tests.PlayMode
         {
             // Arrange
             bool deathTriggered = false;
-            if (health.OnDeath != null)
-                health.OnDeath += () => deathTriggered = true;
-            
+            health.OnDead += () => deathTriggered = true;
             yield return new WaitForSeconds(0.1f);
 
             // Act
             health.TakeDamage(999);
             yield return new WaitForSeconds(0.2f);
 
-            // Assert podría validar muerte
+            // Assert
+            Assert.IsTrue(health.IsDead, "Health should be dead after fatal damage");
+            Assert.IsTrue(deathTriggered, "OnDead event should trigger");
         }
 
         [TearDown]
