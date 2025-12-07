@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace Tests.EditMode
 {
@@ -46,6 +47,9 @@ namespace Tests.EditMode
         [Test]
         public void CreateEffect_WithoutRegisteredPrefab_ReturnsNull()
         {
+            // Expect el error log
+            LogAssert.Expect(LogType.Error, "[VFXEffectFactory] No prefab registered for effect type: ColorFlash");
+            
             // Act
             var instance = factory.CreateEffect(EffectType.ColorFlash, null);
 
