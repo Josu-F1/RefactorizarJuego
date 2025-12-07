@@ -50,6 +50,7 @@ namespace Tests.EditMode
             var instance = factory.CreateEffect(EffectType.ColorFlash, null);
 
             // Assert
+            // El factory retorna null cuando no hay prefab registrado
             Assert.IsNull(instance);
         }
 
