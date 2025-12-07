@@ -13,15 +13,31 @@ namespace Tests.PlayMode
     public class PlayerTests
     {
         private GameObject playerObject;
+        private GameObject testCamera;
 
-        [SetUp]
-        public void SetUp()
+        [UnitySetUp]
+        public IEnumerator SetUp()
         {
+            // IMPORTANTE: Crear cámara PRIMERO y esperar un frame
+            testCamera = new GameObject("TestCamera");
+            var camera = testCamera.AddComponent<Camera>();
+            camera.tag = "MainCamera";
+            camera.orthographic = true;
+            camera.backgroundColor = Color.black;
+            
+            // Esperar para que Unity registre Camera.main
+            yield return null;
+            
+            // Verificar que la cámara está disponible
+            Assert.IsNotNull(Camera.main, "Camera.main debe estar disponible");
+            
             // Limpiar instancias anteriores
             if (Player.Instance != null)
             {
                 Object.DestroyImmediate(Player.Instance.gameObject);
             }
+            
+            yield return null;
         }
 
         [UnityTest]
@@ -74,14 +90,19 @@ namespace Tests.PlayMode
             Assert.IsNotNull(playerObject.GetComponent<Rigidbody2D>(), "Player debe tener Rigidbody2D");
         }
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             if (playerObject != null)
                 Object.DestroyImmediate(playerObject);
             
             if (Player.Instance != null)
                 Object.DestroyImmediate(Player.Instance.gameObject);
+            
+            if (testCamera != null)
+                Object.DestroyImmediate(testCamera);
+            
+            yield return null;
         }
     }
 }

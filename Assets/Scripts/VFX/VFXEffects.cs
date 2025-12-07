@@ -255,7 +255,7 @@ public class ColorFlashEffect : MonoBehaviour, IConfigurableEffect
 public class ParticleEffect : PoolObject, IConfigurableEffect, IPositionalEffect
 {
     [Header("Particle Settings")]
-    [SerializeField] private new ParticleSystem particleSystem;
+    [SerializeField] private ParticleSystem particleSystem;
     
     public EffectType EffectType => EffectType.ParticleExplosion;
     public bool IsPlaying => particleSystem != null && particleSystem.isPlaying;

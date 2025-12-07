@@ -164,7 +164,7 @@ public class CharacterSystemComposer : MonoBehaviourSingleton<CharacterSystemCom
     /// <summary>
     /// Cleanup cuando se destruye el objeto
     /// </summary>
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (activeControllers != null)
         {

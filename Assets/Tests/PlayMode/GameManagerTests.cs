@@ -13,10 +13,24 @@ namespace Tests.PlayMode
     {
         private GameObject gameManagerObject;
         private GameManager gameManager;
+        private GameObject testCamera;
 
-        [SetUp]
-        public void SetUp()
+        [UnitySetUp]
+        public IEnumerator SetUp()
         {
+            // IMPORTANTE: Crear cámara PRIMERO y esperar un frame
+            testCamera = new GameObject("TestCamera");
+            var camera = testCamera.AddComponent<Camera>();
+            camera.tag = "MainCamera";
+            camera.orthographic = true;
+            camera.backgroundColor = Color.black;
+            
+            // Esperar para que Unity registre Camera.main
+            yield return null;
+            
+            // Verificar que la cámara está disponible
+            Assert.IsNotNull(Camera.main, "Camera.main debe estar disponible");
+            
             // Limpiar instancia anterior
             if (GameManager.Instance != null)
             {
@@ -25,6 +39,8 @@ namespace Tests.PlayMode
 
             gameManagerObject = new GameObject("GameManager");
             gameManager = gameManagerObject.AddComponent<GameManager>();
+            
+            yield return null;
         }
 
         [UnityTest]
@@ -64,11 +80,16 @@ namespace Tests.PlayMode
             Assert.AreEqual(0.5f, gameManager.Progress, 0.01f);
         }
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             if (gameManagerObject != null)
                 Object.DestroyImmediate(gameManagerObject);
+            
+            if (testCamera != null)
+                Object.DestroyImmediate(testCamera);
+            
+            yield return null;
         }
     }
 }

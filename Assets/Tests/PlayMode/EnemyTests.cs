@@ -14,11 +14,27 @@ namespace Tests.PlayMode
     {
         private GameObject enemyObject;
         private Enemy enemy;
+        private GameObject testCamera;
 
-        [SetUp]
-        public void SetUp()
+        [UnitySetUp]
+        public IEnumerator SetUp()
         {
+            // IMPORTANTE: Crear cámara PRIMERO y esperar un frame
+            testCamera = new GameObject("TestCamera");
+            var camera = testCamera.AddComponent<Camera>();
+            camera.tag = "MainCamera";
+            camera.orthographic = true;
+            camera.backgroundColor = Color.black;
+            
+            // Esperar para que Unity registre Camera.main
+            yield return null;
+            
+            // Verificar que la cámara está disponible
+            Assert.IsNotNull(Camera.main, "Camera.main debe estar disponible");
+            
             enemyObject = new GameObject("TestEnemy");
+            
+            yield return null;
         }
 
         [UnityTest]
@@ -61,11 +77,16 @@ namespace Tests.PlayMode
             // Nota: Esto depende de cómo implemente Enemy.OnAnyEnemyKilled
         }
 
-        [TearDown]
-        public void TearDown()
+        [UnityTearDown]
+        public IEnumerator TearDown()
         {
             if (enemyObject != null)
                 Object.DestroyImmediate(enemyObject);
+            
+            if (testCamera != null)
+                Object.DestroyImmediate(testCamera);
+            
+            yield return null;
         }
     }
 }
