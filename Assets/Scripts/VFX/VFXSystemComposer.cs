@@ -279,7 +279,7 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
     public IGameEventObserver GetGameEventObserver() => gameEventObserver;
     
     // Cleanup
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (effectPool != null)
         {

@@ -61,7 +61,7 @@ public class Player : MonoBehaviourSingleton<Player>, ICharacter
         }
     }
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         // Limpiar el controlador
         if (characterSystemComposer != null && gameObject != null)

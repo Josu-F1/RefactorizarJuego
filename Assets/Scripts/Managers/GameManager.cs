@@ -128,8 +128,10 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     public int CurrentScore => currentScore;
     public float Progress => (float)currentScore / (float)requiredScore;
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+        
         // Cleanup de eventos
         Enemy.OnAnyEnemyKilled -= IncreaseScore;
         

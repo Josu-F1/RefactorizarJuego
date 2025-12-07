@@ -154,7 +154,7 @@ public class AbilitySystemComposer : MonoBehaviourSingleton<AbilitySystemCompose
     
     // [REMOVED] MigrateLegacyAbilities - Legacy abilities deprecadas, usar AbilityService directamente
     
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         objectAbilities.Clear();
     }
