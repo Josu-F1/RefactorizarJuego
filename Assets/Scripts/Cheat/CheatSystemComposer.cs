@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -104,25 +105,25 @@ public class AddScoreCommand : ICheatCommand
     
     public bool CanExecute()
     {
-        // Verificar si existe GameManagerComposer
-        return GameManagerComposer.Instance != null;
+        // Verificar si existe ScoreService (Clean Architecture)
+        var scoreService = CleanArchitecture.Infrastructure.DependencyInjection.ServiceLocator.Instance.Get<CleanArchitecture.Application.Services.IScoreService>();
+        return scoreService != null;
     }
     
     public void Execute()
     {
         if (!CanExecute())
         {
-            Debug.LogWarning("[AddScoreCommand] No se puede ejecutar - sin GameManagerComposer");
+            Debug.LogWarning("[AddScoreCommand] No se puede ejecutar - sin ScoreService");
             return;
         }
         
-        // Usar el sistema de score del GameManagerComposer
-        var gameManager = GameManagerComposer.Instance;
-        if (gameManager != null)
+        // Usar ScoreService de Clean Architecture
+        var scoreService = CleanArchitecture.Infrastructure.DependencyInjection.ServiceLocator.Instance.Get<CleanArchitecture.Application.Services.IScoreService>();
+        if (scoreService != null)
         {
-            // Simular que un enemigo fue matado para dar puntos
-            Enemy.OnAnyEnemyKilled?.Invoke(scoreAmount);
-            Debug.Log($"[AddScoreCommand] Añadidos {scoreAmount} puntos");
+            scoreService.AddScore(scoreAmount);
+            Debug.Log($"[AddScoreCommand] Añadidos {scoreAmount} puntos via ScoreService");
         }
     }
 }
@@ -132,6 +133,7 @@ public class AddScoreCommand : ICheatCommand
 /// Patrón: Facade Pattern - Simplifica el acceso a los comandos
 /// Patrón: Command Pattern - Gestiona y ejecuta comandos
 /// </summary>
+[System.Obsolete("CheatSystemComposer is deprecated. Cheats should use ServiceLocator to access Clean Architecture services.")]
 public class CheatSystemComposer : MonoBehaviourSingleton<CheatSystemComposer>
 {
     [Header("Cheat System Configuration")]

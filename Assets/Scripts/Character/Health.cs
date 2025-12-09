@@ -5,10 +5,11 @@ using System;
 using UnityEngine.Events;
 
 /// <summary>
-/// OBSOLETO: Esta clase viola principios SOLID y OCP.
-/// Usar HealthSystemComposer con Strategy Pattern
+/// ⚠️ TRANSITIONAL: Esta clase está temporalmente habilitada para compatibilidad
+/// mientras migramos completamente a CharacterSystemComposer
+/// TODO: Migrar completamente y remover esta clase
 /// </summary>
-[System.Obsolete("Use HealthSystemComposer instead. This class violates SOLID principles.")]
+[System.Obsolete("⚠️ TRANSITIONAL: Use CharacterSystemComposer when possible. Legacy support enabled.", false)]
 public class Health : MonoBehaviour
 {
     public static Action<float, Health> OnAnyCharacterHealthChanged { get; set; }
@@ -34,6 +35,8 @@ public class Health : MonoBehaviour
     }
     public void TakeDamage(float damage)
     {
+        if (isDead) return; // No recibir daño si ya está muerto
+        
         currentHP -= damage;
         ClampHP();
         OnHealthChanged?.Invoke(-damage);
@@ -59,5 +62,5 @@ public class Health : MonoBehaviour
     }
     public float Percentage => currentHP / maxHP;
     public bool IsFull => currentHP == maxHP;
-    public bool IsDead => currentHP == 0;
+    public bool IsDead => isDead; // Usar el flag en vez de comparación con 0
 }

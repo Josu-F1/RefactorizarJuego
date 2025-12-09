@@ -32,8 +32,8 @@ public class PoolManager : MonoBehaviourSingleton<PoolManager>
     [SerializeField] private Pool[] pools;
     private Dictionary<PoolObjectType, Pool> poolDictionary;
     
-    // Compatibilidad con nuevo sistema
-    private bool useNewSystem => PoolSystemComposer.Instance != null;
+    // Compatibilidad con nuevo sistema (deprecated)
+    // private bool useNewSystem => PoolSystemComposer.Instance != null;
     protected override void Awake()
     {
         base.Awake();
@@ -49,13 +49,14 @@ public class PoolManager : MonoBehaviourSingleton<PoolManager>
     }
     public GameObject Get(PoolObjectType type, Vector3 position, Quaternion quaternion)
     {
-        // Redirigir al nuevo sistema si está disponible
-        if (useNewSystem)
+        // Prioridad 1: Clean Architecture
+        var legacyAdapter = CleanArchitecture.Presentation.Adapters.LegacyPoolAdapter.Instance;
+        if (legacyAdapter != null)
         {
-            return PoolSystemComposer.PoolManagerCompat.Get(type, position, quaternion);
+            return legacyAdapter.Get(type, position, quaternion);
         }
         
-        // Lógica legacy
+        // Lógica legacy (fallback)
         if (!poolDictionary.ContainsKey(type))
         {
             Debug.Log("Pool of type " + type + " does not exist");
@@ -94,16 +95,18 @@ public class PoolManager : MonoBehaviourSingleton<PoolManager>
     }
     public void ReturnToPool(PoolObjectType type, GameObject g)
     {
-        // Redirigir al nuevo sistema si está disponible
-        if (useNewSystem)
+        // CRITICAL FIX: Evitar ciclo infinito con LegacyPoolAdapter
+        // Usar lógica directa del pool dictionary
+        if (poolDictionary != null && poolDictionary.ContainsKey(type))
         {
-            PoolSystemComposer.PoolManagerCompat.ReturnToPool(type, g);
-            return;
+            g.SetActive(false);
+            g.transform.SetParent(poolDictionary[type].Container.transform);
+            poolDictionary[type].Queue.Enqueue(g);
         }
-        
-        // Lógica legacy
-        g.SetActive(false);
-        g.transform.SetParent(poolDictionary[type].Container.transform);
-        poolDictionary[type].Queue.Enqueue(g);
+        else
+        {
+            Debug.LogWarning($"[PoolManager] No pool found for type {type}. Destroying object.");
+            Destroy(g);
+        }
     }
 }

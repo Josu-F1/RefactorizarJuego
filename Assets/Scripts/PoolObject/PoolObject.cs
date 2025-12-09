@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using PoolSystem.Interfaces;
 using PoolSystem;
@@ -24,14 +25,17 @@ public class PoolObject : MonoBehaviour, IPoolable
     
     public void ReturnToPool()
     {
-        // Usar nuevo sistema si está disponible
-        if (PoolSystemComposer.Instance != null)
+        // Prioridad 1: Clean Architecture
+        var legacyAdapter = CleanArchitecture.Presentation.Adapters.LegacyPoolAdapter.Instance;
+        if (legacyAdapter != null)
         {
-            PoolSystemComposer.ReturnToPool(this);
+            legacyAdapter.ReturnToPool(Type, gameObject);
+            return;
         }
-        else if (poolManager != null)
+        
+        // Prioridad 2: Sistema legacy
+        if (poolManager != null)
         {
-            // Fallback al sistema legacy
             poolManager.ReturnToPool(Type, gameObject);
         }
     }

@@ -1,3 +1,4 @@
+#pragma warning disable CS0414 // Field is assigned but never used
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;

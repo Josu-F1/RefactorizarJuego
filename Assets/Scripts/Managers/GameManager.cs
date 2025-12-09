@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using System;
 using System.Collections;
 using UnityEngine;
@@ -23,21 +24,33 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     public Action OnScoreUpdated { get; set; }
     private int currentScore = 0;
     private bool isPlaying = true;
+    private Player subscribedPlayer;
 
     private void Start()
     {
         // Asegurar que el juego esté en estado normal al inicio
         Time.timeScale = 1f;
         
+        // ✅ Conectar el evento de muerte del jugador
         Enemy.OnAnyEnemyKilled += IncreaseScore;
         
-        // Asegurar que el Player existe antes de suscribirse
-        if (Player.Instance != null)
+        var player = Player.Instance;
+        if (player != null)
         {
-            Player.Instance.OnPlayerDead += Defeat;
+            subscribedPlayer = player;
+            subscribedPlayer.OnPlayerDead += Defeat;
+            Debug.Log("[GameManager] ✅ Conectado a eventos de Player (muerte) y Enemy (score)");
+        }
+        else
+        {
+            Debug.LogWarning("[GameManager] ⚠️ Player.Instance es NULL! No se puede conectar evento de muerte");
         }
     }
 
+    /// <summary>
+    /// OBSOLETO: Ahora lo maneja ScoreService
+    /// </summary>
+    [System.Obsolete("Use ScoreService.AddScore instead")]
     private void IncreaseScore(int score)
     {
         if (!isPlaying)
@@ -65,6 +78,13 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
 
         // USAR EL NUEVO SISTEMA REFACTORIZADO
         string username = DataManagerComposer.CurrentUsername;
+
+        if (string.IsNullOrEmpty(username))
+        {
+            Debug.LogWarning("[GameManager] No hay usuario activo. Se omite guardado de progreso en este nivel.");
+            yield break;
+        }
+
         int actualLevel = DataManagerComposer.GetPlayerLevel(username);
 
         Debug.Log($"[GameManager] GUARDANDO PROGRESO - Usuario: {username}, Nivel actual: {actualLevel}, Nivel completado: {levelNumber}");
@@ -84,6 +104,10 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
         Debug.Log($"[GameManager] Verificación final - Nivel del jugador: {newLevel}");
     }
 
+    /// <summary>
+    /// OBSOLETO: Ahora lo maneja GameStateService
+    /// </summary>
+    [System.Obsolete("Use GameStateService.TriggerDefeat instead")]
     private void Defeat()
     {
         if (!isPlaying)
@@ -104,8 +128,17 @@ public class GameManager : MonoBehaviourSingleton<GameManager>
     public int CurrentScore => currentScore;
     public float Progress => (float)currentScore / (float)requiredScore;
 
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
+        base.OnDestroy();
+        
+        // Cleanup de eventos
         Enemy.OnAnyEnemyKilled -= IncreaseScore;
+        
+        if (subscribedPlayer != null)
+        {
+            subscribedPlayer.OnPlayerDead -= Defeat;
+            subscribedPlayer = null;
+        }
     }
 }

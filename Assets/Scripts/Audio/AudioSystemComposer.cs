@@ -7,6 +7,7 @@ using UnityEngine.Audio;
 /// Principio: Dependency Inversion Principle (DIP) - Usa interfaces
 /// Principio: Single Responsibility Principle (SRP) - Solo coordina componentes de audio
 /// </summary>
+[System.Obsolete("AudioSystemComposer is deprecated. Use IAudioService from ServiceLocator with LegacySoundAdapter instead.")]
 public class AudioSystemComposer : MonoBehaviourSingleton<AudioSystemComposer>
 {
     [Header("Audio Configuration")]

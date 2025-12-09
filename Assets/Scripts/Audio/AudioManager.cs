@@ -44,12 +44,21 @@ public class AudioManager : MonoBehaviourSingleton<AudioManager>
     {
         base.Awake();
         
-        // Compatibilidad: Si no existe AudioSystemComposer, usar implementación original
+        // Compatibilidad: Intentar usar el nuevo sistema primero
+        var legacyAdapter = FindObjectOfType<CleanArchitecture.Presentation.Adapters.LegacySoundAdapter>();
+        
+        if (legacyAdapter != null)
+        {
+            Debug.Log("[AudioManager] Delegando a LegacySoundAdapter (Clean Architecture)");
+            return;
+        }
+        
+        // Segundo nivel: AudioSystemComposer
         audioSystemComposer = FindObjectOfType<AudioSystemComposer>();
         
         if (audioSystemComposer == null)
         {
-            Debug.LogWarning("[AudioManager] OBSOLETO: Usando implementación legacy. Migrar a AudioSystemComposer.");
+            // Sistema legacy (silenciado hasta completar migración)
             InitializeLegacyAudio();
         }
         else
@@ -73,23 +82,30 @@ public class AudioManager : MonoBehaviourSingleton<AudioManager>
     }
     
     /// <summary>
-    /// OBSOLETO: Usar AudioSystemComposer.PlaySound() en su lugar
+    /// OBSOLETO: Usar LegacySoundAdapter o AudioService directamente
     /// </summary>
-    [System.Obsolete("Use AudioSystemComposer.PlaySound() instead", false)]
+    [System.Obsolete("Use LegacySoundAdapter or AudioService directly", false)]
     public void Play(Sound sound)
     {
-        // Delegar al nuevo sistema si existe
+        // Prioridad 1: Clean Architecture
+        var legacyAdapter = CleanArchitecture.Presentation.Adapters.LegacySoundAdapter.Instance;
+        if (legacyAdapter != null)
+        {
+            legacyAdapter.PlaySound(sound);
+            return;
+        }
+        
+        // Prioridad 2: AudioSystemComposer
         if (audioSystemComposer != null)
         {
             audioSystemComposer.PlaySound(sound);
+            return;
         }
-        else
+        
+        // Prioridad 3: Implementación legacy
+        if (audioDictionary.ContainsKey(sound))
         {
-            // Implementación legacy
-            if (audioDictionary.ContainsKey(sound))
-            {
-                audioDictionary[sound].audioSource.Play();
-            }
+            audioDictionary[sound].audioSource.Play();
         }
     }
 }

@@ -9,66 +9,64 @@ using System;
 /// Razón: Violación SRP, lógica mezclada, falta de extensibilidad
 /// </summary>
 [System.Obsolete("Use CharacterSystemComposer with CharacterController instead - Refactored with Component Pattern", false)]
-[RequireComponent(typeof(Health))]
+[RequireComponent(typeof(global::Health))]
 public class Player : MonoBehaviourSingleton<Player>, ICharacter
 {
     public CharacterType CharacterType => CharacterType.Player;
     public Action OnPlayerDead { get; set; }
     
-    private Health health;
+    // [REMOVED] private Health health; - Migrated to CharacterSystemComposer
     private ICharacterController characterController;
     private CharacterSystemComposer characterSystemComposer;
     
     protected override void Awake()
     {
         base.Awake();
-        health = GetComponent<Health>();
-        
-        // Intentar obtener el sistema refactorizado
-        characterSystemComposer = CharacterSystemComposer.Instance;
+        // [REMOVED] health = GetComponent<Health>(); - Migrated to CharacterSystemComposer
     }
     
     private void Start()
     {
-        // Si existe el sistema refactorizado, usarlo
-        if (characterSystemComposer != null)
+        // Obtener el sistema refactorizado (en Start para garantizar inicialización)
+        characterSystemComposer = CharacterSystemComposer.Instance;
+        
+        // Si no existe, crearlo automáticamente
+        if (characterSystemComposer == null)
         {
-            characterController = characterSystemComposer.CreateCharacterController(CharacterType.Player, gameObject);
-            
-            // Conectar eventos para compatibilidad
-            var deathHandler = characterController?.GetComponent<IDeathHandler>();
-            if (deathHandler != null)
-            {
-                deathHandler.OnDeath += () => OnPlayerDead?.Invoke();
-                Debug.Log("[Player] Usando CharacterSystemComposer (SOLID refactorizado)");
-            }
+            Debug.LogWarning("[Player] CharacterSystemComposer no encontrado - Creando automáticamente...");
+            GameObject composerObj = new GameObject("CharacterSystemComposer");
+            characterSystemComposer = composerObj.AddComponent<CharacterSystemComposer>();
+        }
+        
+        characterController = characterSystemComposer.CreateCharacterController(CharacterType.Player, gameObject);
+        
+        // Conectar eventos
+        var deathHandler = characterController?.GetComponent<IDeathHandler>();
+        if (deathHandler != null)
+        {
+            deathHandler.OnDeath += () => OnPlayerDead?.Invoke();
+            Debug.Log("[Player] ✅ Usando CharacterSystemComposer (Clean Architecture)");
         }
         else
         {
-            // Sistema legacy
-            Debug.LogWarning("[Player] OBSOLETO: Usando implementación legacy. Migrar a CharacterSystemComposer.");
-            health.OnDead += Die;
+            Debug.LogWarning("[Player] ⚠️ No se pudo crear CharacterController - usando componente Health legacy como fallback");
+            
+            // Fallback a sistema legacy si falla
+            var healthComponent = GetComponent<global::Health>();
+            if (healthComponent != null)
+            {
+                healthComponent.OnDead += () => OnPlayerDead?.Invoke();
+                Debug.LogWarning("[Player] Usando Health component legacy (no recomendado)");
+            }
         }
     }
     
-    private void Die()
+    protected override void OnDestroy()
     {
-        OnPlayerDead?.Invoke();
-        gameObject.SetActive(false);
-    }
-    
-    private void OnDestroy()
-    {
-        // Limpiar el controlador si existe
+        // Limpiar el controlador
         if (characterSystemComposer != null && gameObject != null)
         {
             characterSystemComposer.CleanupController(gameObject);
-        }
-        
-        // Sistema legacy cleanup
-        if (health != null)
-        {
-            health.OnDead -= Die;
         }
     }
 }

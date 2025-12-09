@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using TMPro;
 
 /// <summary>
 /// Composer principal del sistema VFX refactorizado
@@ -76,25 +77,64 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
     
     private void RegisterEffectsFromDatabase()
     {
+        bool floatingTextRegistered = false;
+
         if (effectDatabase == null)
         {
-            Debug.LogWarning("[VFXSystemComposer] No effect database assigned");
-            return;
+            Debug.LogWarning("[VFXSystemComposer] No effect database assigned - using runtime fallbacks");
         }
-        
-        // Registrar prefabs en factory
-        if (effectFactory is VFXEffectFactory factory)
+        else if (effectFactory is VFXEffectFactory databaseFactory)
         {
             foreach (var entry in effectDatabase.EffectEntries)
             {
-                if (entry.prefab != null)
+                if (entry.prefab == null) continue;
+
+                databaseFactory.RegisterEffectPrefab(entry.effectType, entry.prefab);
+                if (entry.effectType == EffectType.FloatingText)
                 {
-                    factory.RegisterEffectPrefab(entry.effectType, entry.prefab);
+                    floatingTextRegistered = true;
                 }
             }
+
+            Debug.Log($"[VFXSystemComposer] Registered {effectDatabase.EffectEntries.Count} effects from database");
         }
-        
-        Debug.Log($"[VFXSystemComposer] Registered {effectDatabase.EffectEntries.Count} effects from database");
+
+        EnsureFallbackEffectPrefabs(floatingTextRegistered);
+    }
+
+    private void EnsureFallbackEffectPrefabs(bool floatingTextRegistered)
+    {
+        if (effectFactory is not VFXEffectFactory factory) return;
+
+        if (!floatingTextRegistered)
+        {
+            var runtimeFloatingText = CreateRuntimeFloatingTextPrefab();
+            factory.RegisterEffectPrefab(EffectType.FloatingText, runtimeFloatingText);
+            Debug.LogWarning("[VFXSystemComposer] FloatingText prefab missing in database. Registered runtime fallback prefab.");
+        }
+    }
+
+    private GameObject CreateRuntimeFloatingTextPrefab()
+    {
+        var runtimePrefab = new GameObject("RuntimeFloatingTextEffect");
+        runtimePrefab.SetActive(false);
+
+        var textMesh = runtimePrefab.AddComponent<TextMeshPro>();
+        textMesh.text = "0";
+        textMesh.fontSize = 2f;
+        textMesh.alignment = TextAlignmentOptions.Center;
+
+        runtimePrefab.AddComponent<TransformAttach>();
+        runtimePrefab.AddComponent<FloatingTextEffect>();
+
+        var meshRenderer = runtimePrefab.GetComponent<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            meshRenderer.sortingOrder = 100;
+        }
+
+        runtimePrefab.hideFlags = HideFlags.HideAndDontSave;
+        return runtimePrefab;
     }
     
     private void CreateGameEventObserver()
@@ -239,7 +279,7 @@ public class VFXSystemComposer : MonoBehaviourSingleton<VFXSystemComposer>, IEff
     public IGameEventObserver GetGameEventObserver() => gameEventObserver;
     
     // Cleanup
-    private void OnDestroy()
+    protected override void OnDestroy()
     {
         if (effectPool != null)
         {

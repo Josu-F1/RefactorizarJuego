@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System.Collections.Generic;
 using LightSystem.Interfaces;
@@ -158,6 +159,7 @@ namespace LightSystem
     }
 
     // ============= MAIN LIGHT SYSTEM COMPOSER =============
+    [System.Obsolete("LightSystemComposer is deprecated. Use ILightService from ServiceLocator instead.")]
     public class LightSystemComposer : MonoBehaviour, ILightSystemComposer
     {
         [Header("System Configuration")]

@@ -45,7 +45,7 @@ public class Cheat : MonoBehaviour
             Enemy[] enemies = FindObjectsOfType<Enemy>();
             foreach (var enemy in enemies)
             {
-                var health = enemy.GetComponent<Health>();
+                var health = enemy.GetComponent<global::Health>();
                 if (health != null)
                 {
                     health.TakeDamage(veryLargeNumber);
@@ -72,7 +72,7 @@ public class Cheat : MonoBehaviour
             Debug.LogWarning("[Cheat] OBSOLETO: Usando implementación legacy. Migrar a CheatSystemComposer.");
             if (Player.Instance != null)
             {
-                var health = Player.Instance.GetComponent<Health>();
+                var health = Player.Instance.GetComponent<global::Health>();
                 if (health != null)
                 {
                     health.Heal(veryLargeNumber);

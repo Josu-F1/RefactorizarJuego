@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System.Collections.Generic;
 using ShootingSystem.Interfaces;
@@ -187,14 +188,15 @@ namespace ShootingSystem.Factory
 
         public bool ProcessCollision(Collider2D collider, IProjectileData projectileData)
         {
-            #pragma warning disable 0618 // Suppress obsolete warning during migration
-            var health = collider.GetComponent<Health>();
-            if (health != null)
+            // Usar CharacterSystemComposer en lugar de Health legacy
+            var characterSystem = CharacterSystemComposer.Instance;
+            if (characterSystem != null)
             {
+                var controller = characterSystem.GetController(collider.gameObject);
                 var hitCharacter = collider.GetComponent<ICharacter>();
-                if (hitCharacter != null && hitCharacter.CharacterType != projectileData.OwnerType)
+                if (controller != null && hitCharacter != null && hitCharacter.CharacterType != projectileData.OwnerType)
                 {
-                    health.TakeDamage(projectileData.Damage);
+                    controller.NotifyEvent(CharacterEvent.HealthDepleted, projectileData.Damage);
                     return true; // Collision handled, destroy projectile
                 }
             }

@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using ShootingSystem.Interfaces;
 using ShootingSystem.Strategies;
@@ -136,6 +137,13 @@ namespace ShootingSystem.Controllers
         {
             if (useMouseDirection)
             {
+                // Verificar que existe cámara antes de usarla (importante para tests)
+                if (Camera.main == null)
+                {
+                    Debug.LogWarning("[ShootingControllers] Camera.main no disponible - usando dirección por defecto");
+                    return shooter.up;
+                }
+                
                 Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                 Vector2 direction = ((Vector2)mousePos - (Vector2)shooter.position).normalized;
                 return direction;

@@ -1,4 +1,5 @@
 #pragma warning disable 0649
+#pragma warning disable CS0618 // Type or member is obsolete
 
 using UnityEngine;
 using UnityEngine.Events;
@@ -31,13 +32,15 @@ public class Projectile : PoolObject
     private void OnTriggerEnter2D(Collider2D other)
     {
         bool hasCollided = false;
-        Health health = other.GetComponent<Health>();
-        if (health != null)
+        
+        // Usar CharacterSystemComposer
+        var characterSystem = CharacterSystemComposer.Instance;
+        if (characterSystem != null)
         {
-            ICharacter hitCharacter = other.GetComponent<ICharacter>();
-            if (hitCharacter.CharacterType != CharacterType)
+            var controller = characterSystem.GetController(other.gameObject);
+            if (controller != null && controller.CharacterType != CharacterType)
             {
-                health.TakeDamage(Damage);
+                controller.NotifyEvent(CharacterEvent.HealthDepleted, Damage);
                 hasCollided = true;
                 onTargetHit?.Invoke(other);
                 DestroyProjectile();

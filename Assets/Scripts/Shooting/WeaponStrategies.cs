@@ -1,3 +1,5 @@
+#pragma warning disable CS0618 // Type or member is obsolete
+#pragma warning disable CS0414 // Field is assigned but never used
 using UnityEngine;
 using ShootingSystem.Interfaces;
 

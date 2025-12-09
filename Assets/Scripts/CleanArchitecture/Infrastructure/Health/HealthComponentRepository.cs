@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using System;
 using CleanArchitecture.Domain.Health;
 using UnityEngine;
@@ -55,24 +56,17 @@ namespace CleanArchitecture.Infrastructure.Health
                     composer.Heal(delta);
                 }
             }
-            // Si fuese el componente viejo Health, intentamos mapear a sus métodos públicos.
+            // [DISABLED] Health legacy deprecated - usar CharacterSystemComposer
+            /*
             else if (legacyStats is global::Health oldHealth)
             {
-                if (aggregate.IsDead && !oldHealth.IsDead)
-                {
-                    oldHealth.Die();
-                    return;
-                }
-
-                float delta = aggregate.Current - oldHealth.Percentage * aggregate.Max; // aproximación
-                if (delta < 0)
-                {
-                    oldHealth.TakeDamage(Mathf.Abs(delta));
-                }
-                else if (delta > 0)
-                {
-                    oldHealth.Heal(delta);
-                }
+                // Health legacy ya no es soportado
+            }
+            */
+            else
+            {
+                // Health legacy no soportado - usar CharacterSystemComposer
+                Debug.LogWarning("[HealthComponentRepository] Health legacy deprecated");
             }
         }
     }

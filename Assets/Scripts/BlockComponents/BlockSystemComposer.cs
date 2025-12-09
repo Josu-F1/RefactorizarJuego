@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System.Collections.Generic;
 using System;
@@ -6,6 +7,7 @@ using System;
 /// Sistema principal de bloques - VERSIÓN FINAL FUNCIONAL
 /// Patrón: Facade + Factory + Strategy
 /// </summary>
+[System.Obsolete("BlockSystemComposer is deprecated. Use IBlockService from ServiceLocator instead.")]
 public class BlockSystemComposer : MonoBehaviour
 {
     [Header("Block System Configuration")]

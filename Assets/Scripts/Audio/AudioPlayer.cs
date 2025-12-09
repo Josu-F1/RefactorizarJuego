@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -25,18 +26,21 @@ public class AudioPlayer : MonoBehaviour
     
     private void Start() 
     {
-        // Intentar usar el sistema refactorizado primero
-        audioSystemComposer = AudioSystemComposer.Instance;
+        // Prioridad 1: Clean Architecture (LegacySoundAdapter)
+        var legacyAdapter = CleanArchitecture.Presentation.Adapters.LegacySoundAdapter.Instance;
         
-        if (audioSystemComposer == null)
+        if (legacyAdapter != null)
         {
-            // Fallback al sistema legacy
-            audioManager = AudioManager.Instance;
-            Debug.LogWarning("[AudioPlayer] Usando AudioManager legacy. Recomienda migrar a AudioSystemComposer.");
+            Debug.Log("[AudioPlayer] Usando LegacySoundAdapter (Clean Architecture)");
         }
         else
         {
-            Debug.Log("[AudioPlayer] Usando AudioSystemComposer (SOLID refactorizado)");
+            // Fallback al sistema legacy
+            audioManager = AudioManager.Instance;
+            if (audioManager == null)
+            {
+                Debug.LogWarning("[AudioPlayer] No hay sistema de audio disponible. Recomienda migrar a Clean Architecture.");
+            }
         }
         
         if (playOnStart)
@@ -50,27 +54,29 @@ public class AudioPlayer : MonoBehaviour
     /// </summary>
     public void Play()
     {
-        if (audioSystemComposer != null)
+        // Prioridad 1: Clean Architecture
+        var legacyAdapter = CleanArchitecture.Presentation.Adapters.LegacySoundAdapter.Instance;
+        if (legacyAdapter != null)
         {
-            // Sistema refactorizado con SOLID
             if (usePositionalAudio)
             {
-                audioSystemComposer.PlaySoundAtPosition(sound, transform.position);
+                legacyAdapter.PlaySoundAtPosition(sound, transform.position);
             }
             else
             {
-                audioSystemComposer.PlaySound(sound);
+                legacyAdapter.PlaySound(sound);
             }
+            return;
         }
-        else if (audioManager != null)
+        
+        // Fallback: Sistema legacy
+        if (audioManager != null)
         {
-            // Sistema legacy
             audioManager.Play(sound);
+            return;
         }
-        else
-        {
-            Debug.LogError("[AudioPlayer] No hay sistema de audio disponible!");
-        }
+        
+        Debug.LogError("[AudioPlayer] No hay sistema de audio disponible!");
     }
     
     /// <summary>

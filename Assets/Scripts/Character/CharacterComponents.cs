@@ -1,3 +1,4 @@
+#pragma warning disable CS0618 // Type or member is obsolete
 using UnityEngine;
 using System;
 
@@ -141,40 +142,49 @@ public class DeathHandler : IDeathHandler
 /// Manejador de eventos de salud
 /// Principio: Single Responsibility Principle (SRP) - Solo bridge Health-Character
 /// </summary>
+/// <summary>
+/// ⚠️ TRANSITIONAL: Reconectado a Health legacy para compatibilidad
+/// TODO: Migrar a CharacterSystemComposer con EventBus cuando esté completado
+/// </summary>
 public class HealthEventHandler : IHealthEventHandler
 {
     public bool IsActive { get; private set; }
     public event Action OnHealthDepleted;
     
     private ICharacterController controller;
-    private Health health;
+    private global::Health health; // Re-enabled for transitional support
     
     public void Initialize(ICharacterController controller)
     {
         this.controller = controller;
         IsActive = true;
-        SubscribeToHealth();
+        SubscribeToHealth(); // Re-enabled
     }
     
     public void SubscribeToHealth()
     {
+        // Re-enabled - connect to Health legacy component
         if (controller?.GameObject != null)
         {
-            health = controller.GameObject.GetComponent<Health>();
+            health = controller.GameObject.GetComponent<global::Health>();
             if (health != null)
             {
                 health.OnDead += HandleHealthDepleted;
-                Debug.Log("[HealthEventHandler] Subscribed to Health events");
+                UnityEngine.Debug.Log($"[HealthEventHandler] ✅ Conectado a Health component en {controller.GameObject.name}");
+            }
+            else
+            {
+                UnityEngine.Debug.LogWarning($"[HealthEventHandler] ⚠️ No se encontró Health component en {controller.GameObject.name}");
             }
         }
     }
     
     public void UnsubscribeFromHealth()
     {
+        // Re-enabled
         if (health != null)
         {
             health.OnDead -= HandleHealthDepleted;
-            Debug.Log("[HealthEventHandler] Unsubscribed from Health events");
         }
     }
     
@@ -189,9 +199,8 @@ public class HealthEventHandler : IHealthEventHandler
     
     public void OnDestroy()
     {
-        UnsubscribeFromHealth();
         IsActive = false;
+        UnsubscribeFromHealth(); // Cleanup properly
         OnHealthDepleted = null;
-        health = null;
     }
 }

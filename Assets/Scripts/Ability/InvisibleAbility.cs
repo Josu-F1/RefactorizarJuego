@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// ❌ DEPRECATED: Use AbilitySystemComposer with InvisibilityAbilityStrategy instead
+/// </summary>
+[System.Obsolete("❌ DEPRECATED: Use AbilitySystemComposer (Clean Architecture) instead. This legacy class is NO LONGER SUPPORTED.", true)]
 public class InvisibleAbility : MonoBehaviour
 {
     [SerializeField] private float duration = 4f;

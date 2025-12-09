@@ -1,9 +1,13 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using MenuSystem;
 
-[System.Obsolete("Use MenuSystemComposer instead")]
-public class RegisterMenu : MonoBehaviour
+/// <summary>
+/// ✅ Clean Architecture - Register Menu usando MenuSystemComposer
+/// Hereda de BaseMenu para gestión unificada
+/// </summary>
+public class RegisterMenu : BaseMenu
 {
     [Space(15)]
     public TMP_InputField usernameInput;
@@ -13,13 +17,13 @@ public class RegisterMenu : MonoBehaviour
 
     // Nuevos elementos para mostrar mensajes
     public TMP_Text messageText;
-    public float messageDisplayTime = 3f; // Tiempo en segundos que se muestra el mensaje
+    public float messageDisplayTime = 3f;
     private Coroutine messageCoroutine;
 
-    public void Start()
+    protected override void Start()
     {
-        Debug.LogWarning("[OBSOLETE] RegisterMenu is deprecated. Use MenuSystemComposer instead.");
-
+        base.Start(); // ✅ Registrar en MenuSystemComposer
+        
         usernameInput.onValueChanged.AddListener(OnChangeInput);
         passwordInput.onValueChanged.AddListener(OnChangeInput);
         registerButton.onClick.AddListener(OnRegisterButton);
@@ -34,6 +38,8 @@ public class RegisterMenu : MonoBehaviour
         {
             messageText.gameObject.SetActive(false);
         }
+        
+        Debug.Log("[RegisterMenu] ✅ Using MenuSystemComposer (Clean Architecture)");
     }
 
     private void OnChangeInput(string input)
